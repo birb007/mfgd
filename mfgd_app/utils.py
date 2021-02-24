@@ -1,6 +1,3 @@
-from enum import IntEnum
-
-
 def resolve_path(subtree, path):
     path = path.strip("/")
     if path == "":
@@ -20,6 +17,10 @@ def resolve_path(subtree, path):
             return entry
 
 
-class ObjectType(IntEnum):
-    TREE = 2
-    BLOB = 3
+def get_file_history(repo, commit, path):
+    for old_commit in repo.walk(commit):
+        diff = repo.diff(commit, old_commit)
+        for delta in diff.deltas:
+            if delta.new_file.path == path:
+                return old_commit
+    return None

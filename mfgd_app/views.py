@@ -4,7 +4,7 @@ from pathlib import Path
 import pygit2
 
 from mfgd_app import utils
-from mfgd_app.utils import ObjectType
+from mfgd_app.types import ObjectType, StaticEntry
 
 # Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,20 +46,25 @@ def find_branch_or_commit(ident):
         return obj
     except:
         try:
-            branch_ref = repo.references["refs/heads/%s" %ident]
+            branch_ref = repo.references["refs/heads/%s" % ident]
             return repo.get(branch_ref.target)
         except:
             return None
 
-
 def tree(request, commit, path):
-    ctx = {}
+    context = {}
 
-    entry = utils.resolve_path(commit.tree, path)
-    if entry is None or entry.type != ObjectType.TREE:
+    tree_entries = utils.resolve_path(obj.tree, path)
+    if tree_entries is None or tree_entries.type != ObjectType.TREE:
         return HttpResponse("invalid path")
 
-    context["entries"] = entry
+    clean_entries = []
+    for entry in tree_entries:
+        change = utils.get_file_history(repo, commit, path + entry.name)
+        wrapper = StaticEntry(entry.name, entry.type, change)
+        clean_entries.append(wrapper)
+
+    context["entries"] = clean_entries
     context["repo"] = repo
     context["path"] = request.path + ("" if request.path[-1:] == "/" else "/")
     context["depth"] = len(path.strip("/").split("/"))
