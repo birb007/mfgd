@@ -1,0 +1,127 @@
+* {
+    font-family: monospace;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+.menu a {
+    padding: 10px;
+}
+
+.menu {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: flex-start;
+    width: 100%;
+    border: 1px solid black;
+}
+
+.menu a:last-child {
+    margin-left: auto;
+}
+
+.crumbs ol {
+    display: flex;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.crumb a::after {
+    display: inline-block;
+    content: "/";
+    color: #000;
+    padding: 0 1ex;
+}
+
+.commit-msg {
+    width: 50ch;
+    display: block;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.commit-id {
+    min-width: 12ch;
+}
+
+main table {
+    border-top: 1px solid black;
+    border-bottom: 1px solid black;
+    width: 100%;
+}
+
+main {
+    padding-bottom: 10px;
+    width: 60%;
+}
+
+.subtree {
+    font-weight: bold;
+}
+
+.icon {
+    align: left;
+    padding-right: 1ch;
+    align: left;
+    float: left;
+}
+
+.current-branch img {
+    padding-left: 1ch;
+}
+
+.branch, #switch-branch {
+    color: green;
+    font-size: 13px;
+}
+
+.blob a {
+    color: black;
+}
+
+#switch-branch {
+    height: 100%;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    border: 1px solid black;
+    background-color: white;
+}
+
+@media only screen and (max-width: 1200px) {
+    body {
+        width: 100%
+    }
+
+    main {
+        padding-bottom: 10px;
+        width: 100%;
+    }
+
+    .commit-msg {
+        display: none;
+    }
+
+    .menu a:last-child {
+        margin-left: inherit;
+    }
+}
+
+@media only screen and (min-width: 1200px) {
+    main {
+        padding-bottom: 10px;
+        width: 60%;
+    }
+
+    .menu {
+        width: 60%;
+    }
+}

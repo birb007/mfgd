@@ -1,0 +1,47 @@
+{% load static %}
+{% load create_crumbs %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="{% static 'styles/tree.css' %}">
+        <title>Project</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000"/>
+        <script src="{% static 'script.js' %}"></script>
+    </head>
+    <body>
+        <header class="page-header">
+            <h1>Project</h1>
+            <sub>Created on <time datetime="2020-02-24">2018-02-24</time>.</sub>
+        </header>
+        <nav class="menu">
+            <a href="commits/">Commits</a>
+            <a href="tree/">Tree</a>
+            <a href="login/">Login</a>
+        </nav>
+
+        {% create_crumbs branch path depth %}
+
+        <main>
+            <article>
+                <table>
+                    {% for entry in entries %}
+                    <tr>
+                        <td class="{{ entry.type_str }}"><a href="{{ path }}{{ entry.name }}/">
+                        {% if entry.type_str == "blob" %}
+                        <img class="icon" src="{% static 'icons/file.png' %}" alt="blob" />
+                        {% else %}
+                        <img class="icon" src="{% static 'icons/dir.png' %}" alt="blob" />
+                        {% endif %}
+                        {{ entry.name }}</a></td>
+                        <td class="commit-msg">update to include numbers for highlightAll</a></td>
+                        <td class="commit-id"><a class="commit" href="#">111fee7</a></td>
+                        <td class="commit-date"><time datetime="2019-22-01">2019-22-01</time></td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </article>
+        </main>
+    </body>
+</html>

@@ -15,11 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, re_path
-from mfgd import views
+from mfgd_app import views
 
 urlpatterns = [
-    path('', views.index),
-    re_path(r'tree/(?P<commit>\w+)/(?P<path>\S*)', views.tree),
-    re_path(r'blob/(?P<commit>\w+)/(?P<path>\S*)', views.blob),
-    path('admin/', admin.site.urls),
+    path("", views.index),
+    re_path(r"tree/(?P<commit>\w+)/(?P<path>\S*)", views.tree),
+    re_path(r"blob/(?P<commit>\w+)/(?P<path>\S*)", views.blob),
+    path("admin/", admin.site.urls),
 ]
