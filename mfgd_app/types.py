@@ -7,10 +7,10 @@ class ObjectType(IntEnum):
     BLOB = 3
 
 
-class StaticEntry:
-    def __init__(self, name, type, last_change):
-        self.name = name
-        self.type = ObjectType(type)
+class TreeEntry:
+    def __init__(self, entry, last_change):
+        self.name = entry.name
+        self.type = ObjectType(entry.type)
         self.last_change = last_change
 
         if last_change is not None:
@@ -18,3 +18,6 @@ class StaticEntry:
             self.change_time = modification_timestamp.strftime("%Y-%m-%d")
         else:
             self.change_time = ""
+
+        if entry.type == ObjectType.BLOB:
+            self.is_binary = entry.is_binary

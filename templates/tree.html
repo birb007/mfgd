@@ -1,5 +1,6 @@
 {% load static %}
 {% load create_crumbs %}
+{% load select_icon %}
 
 <!DOCTYPE html>
 <html>
@@ -24,15 +25,13 @@
                     {% for entry in entries %}
                     <tr>
                         <td class="{{ entry.type_str }}"><a href="{{ entry.name }}/">
-                        {% if entry.type == 3 %}
-                        <img class="icon" src="{% static 'icons/file.png' %}" alt="blob" />
-                        {% else %}
-                        <img class="icon" src="{% static 'icons/dir.png' %}" alt="blob" />
-                        {% endif %}
+                        {% select_icon entry %}
                         {{ entry.name }}</a></td>
-                        <td class="commit-msg">update to include numbers for highlightAll</a></td>
-                        <td class="commit-id"><a class="commit" href="#">111fee7</a></td>
-                        <td class="commit-date"><time datetime="2019-22-01">2019-22-01</time></td>
+                        <td class="commit-msg">{{ entry.last_change.message }}</a></td>
+                        <td class="commit-id"><a class="commit" href="#">{{ entry.last_change.short_id }}</a></td>
+                        <td class="commit-date">
+                            <time datetime="{{ entry.change_time }}">{{ entry.change_time }}</time>
+                        </td>
                     </tr>
                     {% endfor %}
                 </table>

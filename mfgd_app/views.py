@@ -6,7 +6,7 @@ from pathlib import Path
 import pygit2
 
 from mfgd_app import utils
-from mfgd_app.types import ObjectType, StaticEntry
+from mfgd_app.types import ObjectType, TreeEntry
 
 # Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -43,8 +43,9 @@ def index(request):
 def tree_entries(target, tree, path):
     clean_entries = []
     for entry in tree:
-        change = utils.get_file_history(repo, target.id, path + entry.name)
-        wrapper = StaticEntry(entry.name, entry.type, change)
+        entry_path = utils.normalize_path(path) + "/" + entry.name
+        change = utils.get_file_history(repo, target.id, entry_path)
+        wrapper = TreeEntry(entry, change)
         clean_entries.append(wrapper)
 
 
