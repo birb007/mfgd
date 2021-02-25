@@ -2,7 +2,7 @@ import binascii
 import re
 import string
 
-from mfgd_app.types import ObjectType
+from mfgd_app.types import ObjectType, TreeEntry
 
 # Pre-compiled regex for speed
 split_path_re = re.compile(r"/?([^/]+)/?")
@@ -83,3 +83,16 @@ def hex_dump(binary):
         offset = "{:08x}".format(row_off)
         rows.append((offset, " ".join(chunks), ascii))
     return rows
+
+
+def tree_entries(repo, target, tree, path):
+    clean_entries = []
+    for entry in tree:
+        entry_path = normalize_path(path) + "/" + entry.name
+        change = get_file_history(repo, target.id, entry_path)
+        wrapper = TreeEntry(entry, change)
+        clean_entries.append(wrapper)
+
+    clean_entries.sort(key=lambda entry: entry.name) # secondary sort by name
+    clean_entries.sort(key=lambda entry: entry.type) # primary sort by type
+    return clean_entries

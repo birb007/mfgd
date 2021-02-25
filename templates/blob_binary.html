@@ -19,17 +19,23 @@
             <a href="login/">Login</a>
         </nav>
 
-        {% include "crumbs.html" %}
+        {% create_crumbs oid path branches %}
 
-        {% if code %}
-        <table id="hex-dump">
-            {% for offset, chunks, ascii in code %}
-            <tr>
-                <td>{{ offset }}</td>
-                <td>{{ chunks }}</td>
-                <td>{{ ascii }}</td>
-            {% endfor %}
-        </table>
-        {% endif %}
+        <main>
+            <article>
+                {% if code %}
+                <table id="hex-dump">
+                    {% for offset, chunks, ascii in code %}
+                    <tr>
+                        <td>{{ offset }}</td>
+                        <td>{{ chunks }}</td>
+                        <td>{{ ascii }}</td>
+                    {% endfor %}
+                </table>
+                {% else %}
+                File too large to be displayed.
+                {% endif %}
+            </article>
+        </main>
     </body>
 </html>

@@ -18,13 +18,21 @@
             <a href="login/">Login</a>
         </nav>
 
-        {% include "crumbs.html" %}
+        {% create_crumbs oid path branches %}
 
-        <pre><code id="highlight_code">{{ code }}</code></pre>
-        <script>
-            var code = document.getElementById("highlight_code");
-            code.classList.add("{{ path }}".split('.').pop());
-            hljs.highlightAll();
-        </script>
+        <main>
+            <article>
+                {% if code %}
+                <pre><code id="highlight_code">{{ code }}</code></pre>
+                <script>
+                    var code = document.getElementById("highlight_code");
+                    code.classList.add("{{ path }}".split('.').pop());
+                    hljs.highlightAll();
+                </script>
+                {% else %}
+                File too large to be displayed.
+                {% endif %}
+            </article>
+        </main>
     </body>
 </html>
