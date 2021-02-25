@@ -3,8 +3,19 @@
 <nav class="crumbs">
     <ol>
         <li>
-            <select name="branches" id="switch-branch" onchange="switchBranch(this);">
-                <option value="#" class="branch">branch</option>
+            <script type="text/javascript">
+                function switchBranch(branch) {
+                    window.location.href = "{{ root }}../" + branch;
+                }
+            </script>
+            <select name="branches" id="switch-branch" onchange="switchBranch(this.value);">
+                {% for branch in branches %}
+                {% if branch != oid %}
+                <option class="branch">{{ branch }}</option>
+                {% else %}
+                <option class="branch" selected>{{ branch }}</option>
+                {% endif %}
+                {% endfor %}
             </select>
         </li>
         <li class="crumb">

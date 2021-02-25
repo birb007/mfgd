@@ -19,7 +19,7 @@
             <a href="tree/">Tree</a>
             <a href="login/">Login</a>
         </nav>
-        {% create_crumbs oid path %}
+        {% create_crumbs oid path branches %}
         {% if code %}
         <table id="hex-dump">
             {% for offset, chunks, ascii in code %}

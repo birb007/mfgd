@@ -17,6 +17,8 @@ repo = pygit2.Repository(BASE_DIR / ".git")
 def format_author(commit):
     return "%s <%s>" % (commit.author.name, commit.author.email)
 
+def get_branches():
+    return repo.branches.local
 
 def str_tree(tree, indent=0):
     r = ""
@@ -25,7 +27,6 @@ def str_tree(tree, indent=0):
         if obj.type_str == "tree":
             r += str_tree(obj, indent + 1)
     return r
-
 
 def index(request):
     branch = next(iter(repo.branches.local))
@@ -74,7 +75,7 @@ def view(request, oid, path):
     if obj == None:
         return HttpResponse("Invalid path")
 
-    context = { "oid": oid, "path": path }
+    context = { "oid": oid, "path": path, "branches": get_branches() }
     # Display correct template
     if obj.type == ObjectType.TREE:
         template = "tree.html"
