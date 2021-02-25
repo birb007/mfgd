@@ -1,5 +1,23 @@
 from mfgd_app.types import ObjectType
+import re
 
+# Pre-compiled regex for speed
+split_path_re = re.compile(r"/?([^/]+)/?")
+
+def split_path(path):
+    """Robust, regex-based, path splitter
+    """
+    return split_path_re.findall(path)
+
+def normalize_path(path):
+    """Normalize user-provided path
+    """
+    return "/".join(split_path(path))
+
+def get_parent(n):
+    """Return a path pointing to the nth parent
+    """
+    return "/".join([ ".." for i in range(n) ])
 
 def resolve_path(subtree, path):
     path = path.strip("/")

@@ -1,13 +1,14 @@
 from django import template
+from mfgd_app import utils
 
 register = template.Library()
 
-
 @register.inclusion_tag("crumbs.html")
-def create_crumbs(path, depth):
-    chunks = path.rstrip("/").split("/")
-    block = [(path, chunks[-1])]
+def create_crumbs(oid, path):
+    crumbs = []
 
-    for i in range(1, depth):
-        block.append(("/".join(chunks[:-i]) + "/", chunks[-i - 1]))
-    return {"crumbs": block[::-1]}
+    chunks = utils.split_path(path)
+    for i in range(len(chunks)):
+        crumbs.append((utils.get_parent(len(chunks) - i - 1), chunks[i]))
+
+    return {"oid": oid, "root": utils.get_parent(len(chunks)), "crumbs": crumbs}

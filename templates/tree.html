@@ -4,32 +4,27 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <link rel="stylesheet" href="{% static 'styles/tree.css' %}">
-        <title>Project</title>
+        <title>Tree</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#000000"/>
-        <script src="{% static 'script.js' %}"></script>
+        <!-- Page style !-->
+        <link rel="stylesheet" href="{% static 'style.css' %}">
     </head>
     <body>
-        <header class="page-header">
-            <h1>Project</h1>
-            <sub>Created on <time datetime="2020-02-24">2018-02-24</time>.</sub>
-        </header>
         <nav class="menu">
             <a href="commits/">Commits</a>
             <a href="tree/">Tree</a>
             <a href="login/">Login</a>
         </nav>
 
-        {% create_crumbs path depth %}
+        {% create_crumbs oid path %}
 
         <main>
             <article>
                 <table>
                     {% for entry in entries %}
                     <tr>
-                        <td class="{{ entry.type_str }}"><a href="{{ path }}{{ entry.name }}/">
-                        {% if entry.type_str == "blob" %}
+                        <td class="{{ entry.type_str }}"><a href="{{ entry.name }}/">
+                        {% if entry.type == 3 %}
                         <img class="icon" src="{% static 'icons/file.png' %}" alt="blob" />
                         {% else %}
                         <img class="icon" src="{% static 'icons/dir.png' %}" alt="blob" />

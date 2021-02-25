@@ -125,3 +125,16 @@ main {
         width: 60%;
     }
 }
+
+/* Line numbers for the blob view */
+.line-no {
+    user-select: none;
+}
+
+.line-no a {
+    text-decoration: none;
+}
+
+.line-no a:hover {
+    text-decoration: underline;
+}

@@ -1,7 +1,6 @@
 from enum import IntEnum
 from datetime import datetime
 
-
 class ObjectType(IntEnum):
     COMMIT = 1
     TREE = 2

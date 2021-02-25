@@ -15,7 +15,6 @@ repo = pygit2.Repository(BASE_DIR / ".git")
 def format_author(commit):
     return "%s <%s>" % (commit.author.name, commit.author.email)
 
-
 def str_tree(tree, indent=0):
     r = ""
     for obj in tree:
@@ -23,7 +22,6 @@ def str_tree(tree, indent=0):
         if obj.type_str == "tree":
             r += str_tree(obj, indent + 1)
     return r
-
 
 def index(request):
     branch = next(iter(repo.branches.local))
@@ -36,7 +34,6 @@ def index(request):
         r += "\n"
 
     return HttpResponse(r, content_type="text/plain")
-
 
 def find_branch_or_commit(ident):
     try:
@@ -63,33 +60,31 @@ def tree(request, commit, path):
         change = utils.get_file_history(repo, target.id, path + entry.name)
         wrapper = StaticEntry(entry.name, entry.type, change)
         clean_entries.append(wrapper)
-
-    context["entries"] = clean_entries
-    context["repo"] = repo
-    context["path"] = request.path + ("" if request.path[-1:] == "/" else "/")
-    context["depth"] = len(path.strip("/").split("/"))
-    return "tree.html", context
-
-
-def blob(request, blob):
-    context = {"code": blob.data.decode()}
-    return "blob.html", context
-
+    return clean_entries
 
 def view(request, oid, path):
-    context = {}
+    # First we normalize the path so libgit2 doesn't choke
+    path = utils.normalize_path(path)
 
+    # Find commit in the repo
     target = utils.find_branch_or_commit(repo, oid)
     if target is None:
         return HttpResponse("Invalid commit ID")
 
+    # Resolve path inside commit
     obj = utils.resolve_path(target.tree, path)
-
-    if obj.type == ObjectType.TREE:
-        template, context = tree(request, target, obj, path)
-    elif obj.type == ObjectType.BLOB:
-        template, context = blob(request, obj)
-    else:
+    if obj == None:
         return HttpResponse("Invalid path")
+
+    context = { "oid": oid, "path": path }
+    # Display correct template
+    if obj.type == ObjectType.TREE:
+        template = "tree.html"
+        context["entries"] = tree_entries(target, obj, path)
+    elif obj.type == ObjectType.BLOB:
+        template = "blob.html"
+        context["code"] = obj.data.decode()
+    else:
+        return HttpResponse("Unsupported object type")
 
     return render(request, template, context=context)

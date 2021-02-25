@@ -3,13 +3,17 @@
 <nav class="crumbs">
     <ol>
         <li>
-        <select name="branches" id="switch-branch" onchange="switchBranch(this);">
-            <option value="#" class="branch">branch</option>
-        </select>
+            <select name="branches" id="switch-branch" onchange="switchBranch(this);">
+                <option value="#" class="branch">branch</option>
+            </select>
         </li>
-        <li class="crumb"><a class="branch current-branch" href="#">main<img class="icon" src="{% static 'icons/tree.png' %}" alt="branch" /></a></li>
+        <li class="crumb">
+            <a class="branch current-branch" href="{{ root }}">{{ oid }}<img class="icon" src="{% static 'icons/tree.png' %}" alt="branch" /></a>
+        </li>
         {% for crumb, name in crumbs %}
-        <li class="crumb"><a class="subtree" href="{{ crumb }}">{{ name }}</a></li>
+        <li class="crumb">
+            <a class="subtree" href="{{ crumb }}">{{ name }}</a>
+        </li>
         {% endfor %}
     </ol>
 </nav>

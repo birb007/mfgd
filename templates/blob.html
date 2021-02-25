@@ -1,16 +1,25 @@
 {% load static %}
+{% load create_crumbs %}
+
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Demonstration</title>
-        <link rel="stylesheet" href="{% static 'styles/vs.css' %}">
-        <link rel="stylesheet" href="{% static 'blob.css' %}">
-        <script src="{% static 'highlight.min.js' %}"></script>
+        <title>Blob</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- Page style !-->
+        <link rel="stylesheet" href="{% static 'style.css' %}">
+        <!-- highlight.js !-->
+        <link rel="stylesheet" href="{% static 'highlight/vs.css' %}">
+        <script src="{% static 'highlight/highlight.min.js' %}"></script>
     </head>
     <body>
-        <pre>
-          <code class="c">{{ code }}</code>
-        </pre>
+        <nav class="menu">
+            <a href="commits/">Commits</a>
+            <a href="tree/">Tree</a>
+            <a href="login/">Login</a>
+        </nav>
+        {% create_crumbs oid path %}
+        <pre><code class="c">{{ code }}</code></pre>
         <script>hljs.highlightAll();</script>
     </body>
 </html>
