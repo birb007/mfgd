@@ -55,6 +55,33 @@ def gen_crumbs(path):
         crumbs.append(Crumb(part, "/".join(crumbs)))
     return crumbs
 
+def gen_branches(oid):
+    class Branch:
+        def __init__(self, name, url):
+            self.name = name
+            self.url = url
+
+    l = list(repo.branches.local)
+    if oid not in l:
+        l.append(oid)
+
+    return [ Branch(name, "/view/" + name) for name in l ]
+
+
+def gen_crumbs(path):
+    class Crumb:
+        def __init__(self, name, url):
+            self.name = name
+            self.url = url
+        def __str__(self):
+            return self.name
+
+    crumbs = []
+    for part in utils.split_path(path):
+        crumbs.append(Crumb(part, "/".join(crumbs)))
+    return crumbs
+
+
 def view(request, oid, path):
     # First we normalize the path so libgit2 doesn't choke
     path = utils.normalize_path(path)
@@ -69,7 +96,11 @@ def view(request, oid, path):
     if obj == None:
         return HttpResponse("Invalid path")
 
-    context = { "oid": oid, "path": path, "branches": repo.branches.local }
+    context = { "oid": oid,
+                "path": path,
+                "branches": gen_branches(oid),
+                "crumbs": gen_crumbs(path),
+                }
     # Display correct template
     if obj.type == ObjectType.TREE:
         template = "tree.html"
