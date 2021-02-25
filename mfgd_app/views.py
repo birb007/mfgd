@@ -53,7 +53,7 @@ def gen_crumbs(path):
 
     crumbs = []
     for part in utils.split_path(path):
-        crumbs.append(Crumb(part, "/".join(crumbs)))
+        crumbs.append(Crumb(part, "/".join([ str(c) for c in crumbs] )))
     return crumbs
 
 def gen_branches(oid):
