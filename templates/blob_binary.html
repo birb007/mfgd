@@ -1,5 +1,4 @@
 {% load static %}
-{% load create_crumbs %}
 
 <!DOCTYPE html>
 <html>
@@ -19,7 +18,9 @@
             <a href="tree/">Tree</a>
             <a href="login/">Login</a>
         </nav>
-        {% create_crumbs oid path branches %}
+
+        {% include "crumbs.html" %}
+
         {% if code %}
         <table id="hex-dump">
             {% for offset, chunks, ascii in code %}

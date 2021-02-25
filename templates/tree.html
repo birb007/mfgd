@@ -1,5 +1,4 @@
 {% load static %}
-{% load create_crumbs %}
 {% load select_icon %}
 
 <!DOCTYPE html>
@@ -17,7 +16,7 @@
             <a href="login/">Login</a>
         </nav>
 
-        {% create_crumbs oid path branches %}
+        {% include "crumbs.html" %}
 
         <main>
             <article>

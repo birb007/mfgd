@@ -1,5 +1,4 @@
 {% load static %}
-{% load create_crumbs %}
 
 <!DOCTYPE html>
 <html>
@@ -18,7 +17,9 @@
             <a href="tree/">Tree</a>
             <a href="login/">Login</a>
         </nav>
-        {% create_crumbs oid path branches %}
+
+        {% include "crumbs.html" %}
+
         <pre><code id="highlight_code">{{ code }}</code></pre>
         <script>
             var code = document.getElementById("highlight_code");

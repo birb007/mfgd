@@ -1,29 +1,23 @@
 {% load static %}
-
 <nav class="crumbs">
     <ol>
         <li>
-            <script type="text/javascript">
-                function switchBranch(branch) {
-                    window.location.href = "/view/" + branch;
-                }
-            </script>
-            <select name="branches" id="switch-branch" onchange="switchBranch(this.value);">
+            <select name="branches" id="switch-branch" onchange="window.location.href = this.value;">
                 {% for branch in branches %}
-                {% if branch != oid %}
-                <option class="branch">{{ branch }}</option>
+                {% if branch.name == oid %}
+                <option class="branch" value="{{ branch.url }}" selected>{{ branch.name }}</option>
                 {% else %}
-                <option class="branch" selected>{{ branch }}</option>
+                <option class="branch" value="{{ branch.url }}">{{ branch.name }}</option>
                 {% endif %}
                 {% endfor %}
             </select>
         </li>
         <li class="crumb">
-            <a class="branch current-branch" href="{{ root }}">{{ oid }}<img class="icon" src="{% static 'icons/tree.png' %}" alt="branch" /></a>
+            <a class="branch current-branch" href="/view/{{ oid }}">{{ oid }}<img class="icon" src="{% static 'icons/tree.png' %}" alt="branch" /></a>
         </li>
-        {% for crumb, name in crumbs %}
+        {% for crumb in crumbs %}
         <li class="crumb">
-            <a class="subtree" href="{{ crumb }}">{{ name }}</a>
+            <a class="subtree" href="{{ crumb.url }}">{{ crumb.name }}</a>
         </li>
         {% endfor %}
     </ol>

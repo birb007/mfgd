@@ -17,11 +17,6 @@ def normalize_path(path):
     """
     return "/".join(split_path(path))
 
-def get_parent(n):
-    """Return a path pointing to the nth parent
-    """
-    return "/".join([ ".." for i in range(n) ])
-
 def resolve_path(subtree, path):
     path = path.strip("/")
     if path == "":
