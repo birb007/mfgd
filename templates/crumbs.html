@@ -5,7 +5,7 @@
         <li>
             <script type="text/javascript">
                 function switchBranch(branch) {
-                    window.location.href = "{{ root }}../" + branch;
+                    window.location.href = "/view/" + branch;
                 }
             </script>
             <select name="branches" id="switch-branch" onchange="switchBranch(this.value);">
