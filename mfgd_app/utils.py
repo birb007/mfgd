@@ -1,3 +1,6 @@
+from mfgd_app.types import ObjectType
+
+
 def resolve_path(subtree, path):
     path = path.strip("/")
     if path == "":
@@ -24,3 +27,18 @@ def get_file_history(repo, commit, path):
             if delta.new_file.path == path:
                 return old_commit
     return None
+
+def find_branch_or_commit(repo, oid):
+    try:
+        obj = repo.get(oid)
+        if obj is None or obj.type != ObjectType.COMMIT:
+            raise ValueError()
+        return obj
+    except ValueError:
+        try:
+            branch_ref = repo.references[f"refs/heads/{oid}"]
+            return repo.get(branch_ref.target)
+        except KeyError:
+            return None
+
+

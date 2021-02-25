@@ -30,7 +30,7 @@ def index(request):
     branch_ref = repo.references["refs/heads/%s" % branch]
 
     r = ""
-    for commit in repo.walk(branch_ref.target, GIT_SORT_TOPOLOGICAL):
+    for commit in repo.walk(branch_ref.target, pygit2.GIT_SORT_TOPOLOGICAL):
         r += "%s\n%s\n%s\n" % (commit.oid, format_author(commit), commit.message)
         r += str_tree(commit.tree)
         r += "\n"
@@ -59,8 +59,8 @@ def tree(request, commit, path):
         return HttpResponse("invalid path")
 
     clean_entries = []
-    for entry in tree_entries:
-        change = utils.get_file_history(repo, commit, path + entry.name)
+    for entry in tree:
+        change = utils.get_file_history(repo, target.id, path + entry.name)
         wrapper = StaticEntry(entry.name, entry.type, change)
         clean_entries.append(wrapper)
 
@@ -68,20 +68,28 @@ def tree(request, commit, path):
     context["repo"] = repo
     context["path"] = request.path + ("" if request.path[-1:] == "/" else "/")
     context["depth"] = len(path.strip("/").split("/"))
-    return render(request, "tree.html", context=context)
+    return "tree.html", context
 
 
-def blob(request, commit, path):
-    ctx = {}
+def blob(request, blob):
+    context = {"code": blob.data.decode()}
+    return "blob.html", context
 
-    obj = find_branch_or_commit(commit)
 
-    try:
-        blob = obj.tree[path]
-        if blob.type_str != "blob":
-            raise ValueError()
-    except:
-        return HttpResponse("Path does not point to a blob")
+def view(request, oid, path):
+    context = {}
 
-    ctx["code"] = blob.data.decode()
-    return render(request, "blob.html", context=ctx)
+    target = utils.find_branch_or_commit(repo, oid)
+    if target is None:
+        return HttpResponse("Invalid commit ID")
+
+    obj = utils.resolve_path(target.tree, path)
+
+    if obj.type == ObjectType.TREE:
+        template, context = tree(request, target, obj, path)
+    elif obj.type == ObjectType.BLOB:
+        template, context = blob(request, obj)
+    else:
+        return HttpResponse("Invalid path")
+
+    return render(request, template, context=context)
