@@ -42,6 +42,7 @@ def resolve_path(subtree, path):
 
 
 def get_file_history(repo, commit, path):
+    path = path.lstrip("/")
     for old_commit in repo.walk(commit):
         diff = repo.diff(commit, old_commit)
         for delta in diff.deltas:
