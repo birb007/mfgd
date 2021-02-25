@@ -45,6 +45,10 @@ def tree_entries(target, tree, path):
         change = utils.get_file_history(repo, target.id, path + entry.name)
         wrapper = StaticEntry(entry.name, entry.type, change)
         clean_entries.append(wrapper)
+
+
+    clean_entries.sort(key=lambda entry: entry.name) # secondary sort by name
+    clean_entries.sort(key=lambda entry: entry.type) # primary sort by type
     return clean_entries
 
 

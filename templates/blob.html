@@ -19,7 +19,11 @@
             <a href="login/">Login</a>
         </nav>
         {% create_crumbs oid path %}
-        <pre><code class="c">{{ code }}</code></pre>
-        <script>hljs.highlightAll();</script>
+        <pre><code id="highlight_code">{{ code }}</code></pre>
+        <script>
+            var code = document.getElementById("highlight_code");
+            code.classList.add("{{ path }}".split('.').pop());
+            hljs.highlightAll();
+        </script>
     </body>
 </html>
