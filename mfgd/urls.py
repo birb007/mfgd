@@ -19,6 +19,6 @@ from mfgd_app import views
 
 urlpatterns = [
     path("", views.index),
-    re_path(r"view/(?P<oid>\w+)/(?P<path>\S*)", views.view),
+    re_path(r"view/(?P<oid>\w+)/(?P<path>\S*)", views.view, name="view"),
     path("admin/", admin.site.urls),
 ]

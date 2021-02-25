@@ -2,6 +2,7 @@ import binascii
 
 from django.http import HttpResponse
 from django.shortcuts import render
+from django import urls
 from pathlib import Path
 import pygit2
 
@@ -68,17 +69,22 @@ def gen_branches(oid):
     return [ Branch(name, "/view/" + name) for name in l ]
 
 
-def gen_crumbs(path):
+def gen_crumbs(oid, path):
     class Crumb:
         def __init__(self, name, url):
             self.name = name
             self.url = url
+
         def __str__(self):
             return self.name
 
     crumbs = []
-    for part in utils.split_path(path):
-        crumbs.append(Crumb(part, "/".join(crumbs)))
+    parts = utils.split_path(path)
+    for off in range(len(parts)):
+        relative_path = "/".join(parts[:off + 1]) + "/"
+        url = urls.reverse("view",
+                kwargs={"oid": oid, "path": relative_path})
+        crumbs.append(Crumb(parts[off], url))
     return crumbs
 
 
@@ -99,7 +105,7 @@ def view(request, oid, path):
     context = { "oid": oid,
                 "path": path,
                 "branches": gen_branches(oid),
-                "crumbs": gen_crumbs(path),
+                "crumbs": gen_crumbs(oid, path),
                 }
     # Display correct template
     if obj.type == ObjectType.TREE:
