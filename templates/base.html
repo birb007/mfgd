@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+{% load rango_template_tags %}
+
+<html>
+
+	<head lan="eng">
+		<meta charset="utf-8">
+		<title>Tree</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- Page style !-->
+        <link rel="stylesheet" href="{% static 'style.css' %}">
+        <!-- highlight.js !-->
+        <link rel="stylesheet" href="{% static 'highlight/vs.css' %}">
+        <script src="{% static 'highlight/highlight.min.js' %}"></script>
+	</head>
+
+	<body>
+		<nav class="menu">
+            <a href="commits/">Commits</a>
+            <a href="tree/">Tree</a>
+            <a href="login/">Login</a>
+        </nav>
+
+		{% block body_block %}
+			This is the body_block's default content.
+		{% endblock %}
+
+	</body>
+
+</html>
