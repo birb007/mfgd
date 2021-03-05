@@ -14,16 +14,16 @@ a:hover {
     padding: 10px;
 }
 
+.menu a:nth-last-child(2) {
+    margin-left: auto;
+}
+
 .menu {
     display: flex;
     flex-flow: row wrap;
     justify-content: flex-start;
     width: 100%;
     border: 1px solid black;
-}
-
-.menu a:last-child {
-    margin-left: auto;
 }
 
 .crumbs ol {
@@ -55,6 +55,9 @@ main table {
     border-top: 1px solid black;
     border-bottom: 1px solid black;
     width: 100%;
+    table-layout:fixed;
+    text-overflow:ellipsis;
+    overflow:hidden;
 }
 
 main {
@@ -110,7 +113,7 @@ main {
         display: none;
     }
 
-    .menu a:last-child {
+    .menu a:nth-last-child(2) {
         margin-left: inherit;
     }
 }

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_block %}
+	<br>
+	<main>
+        <article>
+        	<table>
+                <tr>
+                    <td>Repository</td>
+                    <td>Description</td>
+                    <td>Latest Commit</td>
+                    <td>Latest Change</td>
+                </tr>
+            </table>
+            <table>
+                {% for repo in repositories %}
+                <tr>
+                    <td>{{ repo.name }}</td>
+                    <td>{{ repo.description }}</td>
+                    <td>Latest Commit</td>
+                    <td>Latest Change</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </article>
+    </main>
+
+{% endblock %}

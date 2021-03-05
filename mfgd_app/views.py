@@ -8,6 +8,7 @@ import pygit2
 
 from mfgd_app import utils
 from mfgd_app.types import ObjectType, TreeEntry
+from mfgd_app.models import Repository
 
 # Directory
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,7 +16,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 repo = pygit2.Repository(BASE_DIR / ".git")
 
 def index(request):
-    return HttpResponse("this is the index page", content_type="text/plain")
+    context_dict = {}
+    repo_list = Repository.objects.all()
+    for i, rep in enumerate(repo_list):
+        repo_list[i].description = repo_list[i].description[0:30] # Only select the first 30 chacters in case of overflow
+    context_dict['repositories'] = repo_list # Load the repos data here
+    return render(request, 'index.html', context_dict)
 
 def read_blob(blob):
     MAX_BLOB_SIZE = 100 * 1 << 10   # 100K
