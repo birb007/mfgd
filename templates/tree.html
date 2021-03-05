@@ -1,40 +1,26 @@
+{% extends 'base.html' %}
 {% load static %}
-{% load select_icon %}
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Tree</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <!-- Page style !-->
-        <link rel="stylesheet" href="{% static 'style.css' %}">
-    </head>
-    <body>
-        <nav class="menu">
-            <a href="commits/">Commits</a>
-            <a href="tree/">Tree</a>
-            <a href="login/">Login</a>
-        </nav>
-
-        {% include "crumbs.html" %}
-
-        <main>
-            <article>
-                <table>
-                    {% for entry in entries %}
-                    <tr>
-                        <td class="{{ entry.type_str }}"><a href="{{ entry.name }}/">
-                        {% select_icon entry %}
-                        {{ entry.name }}</a></td>
-                        <td class="commit-msg">{{ entry.last_change.message }}</a></td>
-                        <td class="commit-id"><a class="commit" href="#">{{ entry.last_change.short_id }}</a></td>
-                        <td class="commit-date">
-                            <time datetime="{{ entry.change_time }}">{{ entry.change_time }}</time>
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
-            </article>
-        </main>
-    </body>
-</html>
+{% block body_block %}
+    
+    {% load select_icon %}
+    {% include "crumbs.html" %}
+    <main>
+        <article>
+            <table>
+                {% for entry in entries %}
+                <tr>
+                    <td class="{{ entry.type_str }}"><a href="{{ entry.name }}/">
+                    {% select_icon entry %}
+                    {{ entry.name }}</a></td>
+                    <td class="commit-msg">{{ entry.last_change.message }}</a></td>
+                    <td class="commit-id"><a class="commit" href="#">{{ entry.last_change.short_id }}</a></td>
+                    <td class="commit-date">
+                        <time datetime="{{ entry.change_time }}">{{ entry.change_time }}</time>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </article>
+    </main>
+{% endblock %}

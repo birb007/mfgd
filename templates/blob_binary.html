@@ -1,41 +1,27 @@
+{% extends 'base.html' %}
 {% load static %}
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Binary Blob</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <!-- Page style !-->
-        <link rel="stylesheet" href="{% static 'style.css' %}">
-        <link rel="stylesheet" href="{% static 'hex.css' %}">
-        <!-- highlight.js !-->
-        <link rel="stylesheet" href="{% static 'highlight/vs.css' %}">
-        <script src="{% static 'highlight/highlight.min.js' %}"></script>
-    </head>
-    <body>
-        <nav class="menu">
-            <a href="commits/">Commits</a>
-            <a href="tree/">Tree</a>
-            <a href="login/">Login</a>
-        </nav>
+{% include "crumbs.html" %}
 
-        {% include "crumbs.html" %}
+{% block head_block %}
+    <link rel="stylesheet" href="{% static 'hex.css' %}">
+{% endblock %}
 
-        <main>
-            <article>
-                {% if code %}
-                <table id="hex-dump">
-                    {% for offset, chunks, ascii in code %}
-                    <tr>
-                        <td>{{ offset }}</td>
-                        <td>{{ chunks }}</td>
-                        <td>{{ ascii }}</td>
-                    {% endfor %}
-                </table>
-                {% else %}
-                File too large to be displayed.
-                {% endif %}
-            </article>
-        </main>
-    </body>
-</html>
+{% block body_block %}
+    <main>
+        <article>
+            {% if code %}
+            <table id="hex-dump">
+                {% for offset, chunks, ascii in code %}
+                <tr>
+                    <td>{{ offset }}</td>
+                    <td>{{ chunks }}</td>
+                    <td>{{ ascii }}</td>
+                {% endfor %}
+            </table>
+            {% else %}
+            File too large to be displayed.
+            {% endif %}
+        </article>
+    </main>
+{% endblock %}
