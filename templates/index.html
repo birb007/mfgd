@@ -16,7 +16,7 @@
             <table>
                 {% for repo in repositories %}
                 <tr>
-                    <td>{{ repo.name }}</td>
+                    <td><a href="/view/{{ repo.name }}/">{{ repo.name }}</a></td>
                     <td>{{ repo.description }}</td>
                     <td>Latest Commit</td>
                     <td>Latest Change</td>

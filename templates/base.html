@@ -19,10 +19,14 @@
 
 	<body>
 		<nav class="menu">
-            <a href="commits/">Commits</a>
+			{% if user.is_authenticated %}
+				<p>Hello: {{ user.username }}</p>
+				<a href="{% url 'mfgd:logout' %}">Logout</a>
             <a href="tree/">Tree</a>
-            <a href="login/">Login</a>
-            <a href="register/">Register</a>
+			{% else %}
+				<a href="login/">Login</a>
+            	<a href="register/">Register</a>
+			{% endif %}
         </nav>
 
 		{% block body_block %}

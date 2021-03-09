@@ -10,7 +10,7 @@ a:hover {
     text-decoration: underline;
 }
 
-.menu a {
+.menu a,p {
     padding: 10px;
 }
 
