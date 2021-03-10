@@ -1,9 +1,12 @@
 import binascii
 
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.urls import reverse
 from django import urls
 from pathlib import Path
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 import pygit2
 
 from mfgd_app import utils
@@ -96,3 +99,33 @@ def view(request, oid, path):
         return HttpResponse("Unsupported object type")
 
     return render(request, template, context=context)
+
+def user_login(request):
+    if request.method == 'POST':
+
+        # Get the form details and check if they match the data in the database
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(username=username, password=password)
+
+        if user:
+            if user.is_active:
+                login(request, user)
+                return index(request)
+            else:
+                # User account is deactivated
+                return HttpResponse("Your account is disabled.")
+
+        else:
+            # User account details were incorrect
+            print(f"Invalid login details: {username}, {password}")
+            return HttpResponse("Invalid login details supplied.")
+
+    else:
+        return render(request, 'login.html')
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return index(request)

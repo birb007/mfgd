@@ -21,4 +21,6 @@ urlpatterns = [
     path("", views.index),
     re_path(r"view/(?P<oid>\w+)/(?P<path>\S*)", views.view, name="view"),
     path("admin/", admin.site.urls),
+    path('logout/', views.user_logout, name='logout'),
+    path('login/', views.user_login, name='login'),
 ]
