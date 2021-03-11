@@ -9,15 +9,13 @@
                 <tr class="underline">
                     <td>Repository</td>
                     <td>Description</td>
-                    <td>Latest Commit</td>
-                    <td>Latest Change</td>
+                    <td>Default branch</td>
                 </tr>
                 {% for repo in repositories %}
                 <tr>
                     <td><a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a></td>
                     <td>{{ repo.description }}</td>
-                    <td>Latest Commit</td>
-                    <td>Latest Change</td>
+                    <td>{{ repo.default_branch }}</td>
                 </tr>
                 {% endfor %}
             </table>
