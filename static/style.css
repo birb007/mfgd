@@ -1,3 +1,7 @@
+/*
+ * General
+ */
+
 * {
     font-family: monospace;
 }
@@ -10,6 +14,10 @@ a:hover {
     text-decoration: underline;
 }
 
+/*
+ * Menu
+ */
+
 /* Navigation bar itself */
 #menu {
     width: 100%;
@@ -20,7 +28,7 @@ a:hover {
 }
 
 /* "Normal" menu items */
-#menu a, span {
+#menu a, #menu span {
     float: left;
     display: block;
     padding: 10px;
@@ -31,6 +39,9 @@ a:hover {
     float: right;
 }
 
+/*
+ * Crumbs navigation
+ */
 .crumbs ol {
     display: flex;
     list-style-type: none;
@@ -56,13 +67,22 @@ a:hover {
     min-width: 12ch;
 }
 
-main table {
+#mfgd-table {
+    border-collapse: collapse;
     border-top: 1px solid black;
     border-bottom: 1px solid black;
     width: 100%;
     table-layout:fixed;
     text-overflow:ellipsis;
     overflow:hidden;
+}
+
+#mfgd-table tr.underline {
+    border-bottom: 1px solid black;
+}
+
+#mfgd-table td {
+    padding: 3px;
 }
 
 main {

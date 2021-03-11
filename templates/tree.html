@@ -2,12 +2,18 @@
 {% load static %}
 
 {% block body_block %}
-    
+
     {% load select_icon %}
     {% include "crumbs.html" %}
     <main>
         <article>
-            <table>
+            <table id="mfgd-table">
+                <tr class="underline">
+                    <td>Name</td>
+                    <td>Last change message</td>
+                    <td>Last change id</td>
+                    <td>Last change date</td>
+                </tr>
                 {% for entry in entries %}
                 <tr>
                     <td class="{{ entry.type_str }}"><a href="{{ entry.name }}/">

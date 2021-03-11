@@ -5,16 +5,13 @@
 	<br>
 	<main>
         <article>
-        	<table>
-                <tr>
+            <table id="mfgd-table">
+                <tr class="underline">
                     <td>Repository</td>
                     <td>Description</td>
                     <td>Latest Commit</td>
                     <td>Latest Change</td>
                 </tr>
-            </table>
-            <!-- NOTE: Ugly inline css, Jack please fix it, idk how your css works !-->
-            <table style="margin-top: 10px">
                 {% for repo in repositories %}
                 <tr>
                     <td><a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a></td>
