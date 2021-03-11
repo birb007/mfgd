@@ -20,7 +20,7 @@
                     {% select_icon entry %}
                     {{ entry.name }}</a></td>
                     <td class="commit-msg">{{ entry.last_change.message }}</a></td>
-                    <td class="commit-id"><a class="commit" href="#">{{ entry.last_change.short_id }}</a></td>
+                    <td class="commit-id"><a class="commit" href="/{{ repo_name }}/view/{{ entry.last_change.oid }}">{{ entry.last_change.short_id }}</a></td>
                     <td class="commit-date">
                         <time datetime="{{ entry.change_time }}">{{ entry.change_time }}</time>
                     </td>
