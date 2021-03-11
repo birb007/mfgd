@@ -88,6 +88,10 @@ def hex_dump(binary):
 def tree_entries(repo, target, tree, path):
     clean_entries = []
     for entry in tree:
+        # Avoid displaying commit objects which might appear here
+        # (such as when browsing a non-default branch)
+        if entry.type_str != "blob" and entry.type_str != "tree":
+            continue
         entry_path = normalize_path(path) + "/" + entry.name
         change = get_file_history(repo, target.id, entry_path)
         wrapper = TreeEntry(entry, change)
