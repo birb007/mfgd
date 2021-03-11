@@ -10,20 +10,25 @@ a:hover {
     text-decoration: underline;
 }
 
-.menu a,p {
+/* Navigation bar itself */
+#menu {
+    width: 100%;
+    display: block;
+    overflow: hidden;
+    border: 1px solid black;
+    vertical-align: center;
+}
+
+/* "Normal" menu items */
+#menu a, span {
+    float: left;
+    display: block;
     padding: 10px;
 }
 
-.menu a:nth-last-child(2) {
-    margin-left: auto;
-}
-
-.menu {
-    display: flex;
-    flex-flow: row wrap;
-    justify-content: flex-start;
-    width: 100%;
-    border: 1px solid black;
+/* Right floating menu items */
+#menu a.right {
+    float: right;
 }
 
 .crumbs ol {
@@ -112,10 +117,6 @@ main {
     .commit-msg {
         display: none;
     }
-
-    .menu a:nth-last-child(2) {
-        margin-left: inherit;
-    }
 }
 
 @media only screen and (min-width: 1200px) {
@@ -124,7 +125,7 @@ main {
         width: 60%;
     }
 
-    .menu {
+    #menu {
         width: 60%;
     }
 }

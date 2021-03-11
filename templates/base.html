@@ -18,13 +18,13 @@
 	</head>
 
 	<body>
-		<nav class="menu">
+		<nav id="menu">
 			{% if user.is_authenticated %}
-				<p>Hello: {{ user.username }}</p>
-				<a href="{% url 'logout' %}">Logout</a>
+				<span>Hello: {{ user.username }}</span>
+				<a class="right" href="{% url 'logout' %}">Logout</a>
 			{% else %}
-				<a href="{% url 'login' %}">Login</a>
-            	<a href="register/">Register</a>
+				<a class="right" href="{% url 'login' %}">Login</a>
+            	<a class="right" href="register/">Register</a>
 			{% endif %}
         </nav>
 
