@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 
 class Repository(models.Model):
 	name = models.CharField(max_length=256, unique=True, primary_key=True)
+	path = models.TextField(blank=True)
 	description = models.TextField(blank=True)
 	isPublic = models.BooleanField(default=False)
 
