@@ -112,7 +112,7 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return index(request)
+                return redirect("index")
             else:
                 # User account is deactivated
                 return HttpResponse("Your account is disabled.")
@@ -128,4 +128,4 @@ def user_login(request):
 @login_required
 def user_logout(request):
     logout(request)
-    return index(request)
+    return redirect("index")

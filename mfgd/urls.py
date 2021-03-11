@@ -18,7 +18,7 @@ from django.urls import path, re_path
 from mfgd_app import views
 
 urlpatterns = [
-    path("", views.index),
+    path("", views.index, name="index"),
     re_path(r"view/(?P<oid>\w+)/(?P<path>\S*)", views.view, name="view"),
     path("admin/", admin.site.urls),
     path('logout/', views.user_logout, name='logout'),
