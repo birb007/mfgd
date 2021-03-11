@@ -13,21 +13,27 @@ from mfgd_app import utils
 from mfgd_app.types import ObjectType, TreeEntry
 from mfgd_app.models import Repository
 
-# Directory
-BASE_DIR = Path(__file__).resolve().parent.parent
-# Repo
-repo = pygit2.Repository(BASE_DIR / ".git")
+def default_branch(db_repo_obj):
+    # NOTE: someone please fix this if you can, but the pygit2 API does not
+    # provide access to the global HEAD as it's not a proper ref
+    with open(db_repo_obj.path + "/.git/HEAD") as f:
+        return f.read().split("/")[-1]
 
 def index(request):
     context_dict = {}
     repo_list = Repository.objects.all()
-    for i, rep in enumerate(repo_list):
-        repo_list[i].description = repo_list[i].description[0:30] # Only select the first 30 chacters in case of overflow
-    context_dict['repositories'] = repo_list # Load the repos data here
+    for i, db_repo_obj in enumerate(repo_list):
+        # We need to stick the default branch name to each repo here
+        repo_list[i].default_branch = default_branch(db_repo_obj)
+        # Only select the first 30 chacters in case of overflow
+        repo_list[i].description = repo_list[i].description[0:30]
+    # Load the repos data here
+    context_dict['repositories'] = repo_list
     return render(request, 'index.html', context_dict)
 
 def read_blob(blob):
-    MAX_BLOB_SIZE = 100 * 1 << 10   # 100K
+    # 100K
+    MAX_BLOB_SIZE = 100 * 1 << 10
 
     content = blob.data
     if blob.is_binary:
@@ -39,20 +45,8 @@ def read_blob(blob):
             return "blob.html", ""
     return "blob.html", content.decode()
 
-def gen_branches(oid):
-    class Branch:
-        def __init__(self, name, url):
-            self.name = name
-            self.url = url
 
-    l = list(repo.branches.local)
-    if oid not in l:
-        l.append(oid)
-
-    return [ Branch(name, "/view/" + name) for name in l ]
-
-
-def gen_crumbs(oid, path):
+def gen_crumbs(repo_name, oid, path):
     class Crumb:
         def __init__(self, name, url):
             self.name = name
@@ -66,11 +60,29 @@ def gen_crumbs(oid, path):
     for off in range(len(parts)):
         relative_path = "/".join(parts[:off + 1]) + "/"
         url = urls.reverse("view",
-                kwargs={"oid": oid, "path": relative_path})
+                kwargs={ "repo_name": repo_name,
+                         "oid": oid,
+                         "path": relative_path })
         crumbs.append(Crumb(parts[off], url))
     return crumbs
 
-def view(request, oid, path):
+def gen_branches(repo_name, repo, oid):
+    class Branch:
+        def __init__(self, name, url):
+            self.name = name
+            self.url = url
+
+    l = list(repo.branches.local)
+    if oid not in l:
+        l.append(oid)
+
+    return [ Branch(name, f"/{repo_name}/view/" + name) for name in l ]
+
+def view(request, repo_name, oid, path):
+    # Find the repo object in the db
+    db_repo_obj = Repository.objects.get(name=repo_name)
+    # Open a pygit2 repo object to the requested repo
+    repo = pygit2.Repository(db_repo_obj.path)
     # First we normalize the path so libgit2 doesn't choke
     path = utils.normalize_path(path)
 
@@ -84,10 +96,12 @@ def view(request, oid, path):
     if obj == None:
         return HttpResponse("Invalid path")
 
-    context = { "oid": oid,
+    context = {
+                "repo_name": repo_name,
+                "oid": oid,
                 "path": path,
-                "branches": gen_branches(oid),
-                "crumbs": gen_crumbs(oid, path),
+                "branches": gen_branches(repo_name, repo, oid),
+                "crumbs": gen_crumbs(repo_name, oid, path),
                 }
     # Display correct template
     if obj.type == ObjectType.TREE:

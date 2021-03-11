@@ -13,7 +13,7 @@
             </select>
         </li>
         <li class="crumb">
-            <a class="branch current-branch" href="/view/{{ oid }}">{{ oid }}<img class="icon" src="{% static 'icons/tree.png' %}" alt="branch" /></a>
+            <a class="branch current-branch" href="/{{ repo_name }}/view/{{ oid }}">{{ oid }}<img class="icon" src="{% static 'icons/tree.png' %}" alt="branch" /></a>
         </li>
         {% for crumb in crumbs %}
         <li class="crumb">
