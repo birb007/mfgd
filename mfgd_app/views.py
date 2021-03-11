@@ -13,6 +13,7 @@ import pygit2
 from mfgd_app import utils
 from mfgd_app.types import ObjectType, TreeEntry, FileChange
 from mfgd_app.models import Repository
+from mfgd_app.forms import UserForm
 
 
 def default_branch(db_repo_obj):
@@ -147,6 +148,27 @@ def user_login(request):
     else:
         return render(request, "login.html")
 
+
+def user_register(request):
+    registered = False
+    # Check if form is valid, if it is, save data to database
+    if request.method == 'POST':
+        user_form = UserForm(request.POST)
+
+        if user_form.is_valid():
+            user = user_form.save()
+            user.set_password(user.password)
+            user.save()
+
+            registered = True
+
+        else:
+            print(user_form.errors)
+
+    else:
+        user_form = UserForm()
+
+    return render(request, 'register.html', context={'user_form': user_form, 'registered': registered})
 
 @login_required
 def user_logout(request):

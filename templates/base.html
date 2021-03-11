@@ -23,8 +23,8 @@
 				<span>Hello: {{ user.username }}</span>
 				<a class="right" href="{% url 'logout' %}">Logout</a>
 			{% else %}
-				<a class="right" href="{% url 'login' %}">Login</a>
-            	<a class="right" href="register/">Register</a>
+				<a href="{% url 'login' %}">Login</a>
+            	<a href="{% url 'register' %}">Register</a>
 			{% endif %}
         </nav>
 
