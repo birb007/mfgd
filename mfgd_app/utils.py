@@ -94,9 +94,19 @@ def tree_entries(repo, target, tree, path):
             continue
         entry_path = normalize_path(path) + "/" + entry.name
         change = get_file_history(repo, target.id, entry_path)
-        wrapper = TreeEntry(entry, change)
+        wrapper = TreeEntry(entry, change, entry_path)
         clean_entries.append(wrapper)
 
     clean_entries.sort(key=lambda entry: entry.name) # secondary sort by name
     clean_entries.sort(key=lambda entry: entry.type) # primary sort by type
     return clean_entries
+
+
+def get_patch(repo, new=None, old=None):
+    if old is None:
+        id = repo.create_blob("")
+        old = repo[id]
+        return old.diff(new)
+    if new is None:
+        return old.diff()
+    return old.diff(new)

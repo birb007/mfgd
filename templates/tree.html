@@ -20,7 +20,11 @@
                     {% select_icon entry %}
                     {{ entry.name }}</a></td>
                     <td class="commit-msg">{{ entry.last_change.message }}</a></td>
-                    <td class="commit-id"><a class="commit" href="/{{ repo_name }}/view/{{ entry.last_change.oid }}">{{ entry.last_change.short_id }}</a></td>
+                    {% if entry.last_change %}
+                    <td class="commit-id"><a class="commit" href="{% url 'info' repo_name entry.last_change_id %}">{{ entry.last_change.short_id }}</a></td>
+                    {% else %}
+                    <td class="commit-id">{{ entry.last_change.short_id }}</td>
+                    {% endif %}
                     <td class="commit-date">
                         <time datetime="{{ entry.change_time }}">{{ entry.change_time }}</time>
                     </td>

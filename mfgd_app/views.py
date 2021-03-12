@@ -1,4 +1,5 @@
 import binascii
+import datetime as dt
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -10,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 import pygit2
 
 from mfgd_app import utils
-from mfgd_app.types import ObjectType, TreeEntry
+from mfgd_app.types import ObjectType, TreeEntry, FileChange
 from mfgd_app.models import Repository
 
 def default_branch(db_repo_obj):
@@ -18,6 +19,8 @@ def default_branch(db_repo_obj):
     # provide access to the global HEAD as it's not a proper ref
     with open(db_repo_obj.path + "/.git/HEAD") as f:
         return f.read().split("/")[-1]
+
+
 
 def index(request):
     context_dict = {}
@@ -30,6 +33,7 @@ def index(request):
     # Load the repos data here
     context_dict['repositories'] = repo_list
     return render(request, 'index.html', context_dict)
+
 
 def read_blob(blob):
     # 100K
@@ -114,6 +118,7 @@ def view(request, repo_name, oid, path):
 
     return render(request, template, context=context)
 
+
 def user_login(request):
     if request.method == 'POST':
 
@@ -139,7 +144,66 @@ def user_login(request):
     else:
         return render(request, 'login.html')
 
+
 @login_required
 def user_logout(request):
     logout(request)
     return redirect("index")
+
+
+def info(request, repo_name, oid):
+    db_repo_obj = Repository.objects.get(name=repo_name)
+    # Open a pygit2 repo object to the requested repo
+    repo = pygit2.Repository(db_repo_obj.path)
+
+    obj = utils.find_branch_or_commit(repo, oid)
+    if obj is None:
+        return HttpResponse("Invalid branch or commit ID")
+    elif isinstance(obj, pygit2.Branch):
+        commit = repo.get(pygti2.Branch.target)
+    else:
+        commit = obj
+
+    changes = []
+    timestamp = dt.datetime.utcfromtimestamp(commit.commit_time).strftime(
+            "%Y-%m-%d %H:%M:%S")
+    message_subject, message_body = commit.message.split("\n", maxsplit=1)
+
+    # not initial commit
+    if len(commit.parents):
+        diff = repo.diff(commit.parents[0], commit)
+        for delta in diff.deltas:
+            new = repo.get(delta.new_file.id)
+            old = repo.get(delta.old_file.id)
+
+            status_char = delta.status_char()
+            status = delta.status
+
+            diff = utils.get_patch(repo, new, old)
+            if old is None:
+                path = delta.new_file.path
+            else:
+                path = delta.old_file.path
+            changes.append(FileChange(diff, status_char, status, path, new, old))
+    # initial commit
+    else:
+        for entry in utils.tree_entries(repo, commit, commit.tree, "/"):
+            if entry.type != ObjectType.BLOB:
+                continue
+            patch = utils.get_patch(repo, entry.entry)
+            changes.append(
+                    FileChange(patch, "A", pygit2.GIT_DELTA_ADDED, entry.path,
+                        entry.entry, None))
+
+    context = {
+        "repo_name": repo_name,
+        "oid": oid,
+        "author": commit.author,
+        "commit": commit,
+        "commit_timestamp": timestamp,
+        "changes": changes,
+        "message": commit.message,
+        "message_subject": message_subject,
+        "message_body": message_body,
+    }
+    return render(request, "commit.html", context=context)

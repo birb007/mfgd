@@ -21,6 +21,8 @@ urlpatterns = [
     path("", views.index, name="index"),
     re_path(r"(?P<repo_name>\w+)/view/(?P<oid>\w+)/(?P<path>\S*)",
             views.view, name="view"),
+    re_path(r"(?P<repo_name>\w+)/info/(?P<oid>\w+)/?", views.info,
+        name="info"),
     path("admin/", admin.site.urls),
     path('logout/', views.user_logout, name='logout'),
     path('login/', views.user_login, name='login'),

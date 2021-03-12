@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_block %}
+
+<nav class="controls">
+    <ol>
+        <li><img class="icon" src="{% static 'icons/commit.png' %}"/></li>
+        <li><a href="{% url 'view' repo_name oid '' %}">Inspect Tree</a></li>
+    </ol>
+</nav>
+
+<main>
+    <article>
+        <ul>
+            <li>From: {{ author.name }} &lt;{{ author.email}}&gt;</li>
+            <li>Date: {{ commit_timestamp }}</li>
+        </ul>
+        <pre class class="text">{{ message }}</pre>
+        Modified Files:
+        <table>
+            {% for change in changes %}
+            <tr>
+                <td>{{ change.status }}</td>
+                <td>{{ change.insertion }}</td>
+                <td>{{ change.deletion }}</td>
+                {% if not change.deleted %}
+                <td><a href="{% url 'view' repo_name oid change.path %}">{{ change.path }}</a></td>
+                {% else %}
+                <td>{{ change.path }}</td>
+                {% endif %}
+            </tr>
+            {% endfor %}
+        </table>
+    </article>
+    <article>
+        Patches:
+        {% for change in changes %}
+            {% if change.patch %}
+            {% if not change.deleted %}
+            <td><a href="{% url 'view' repo_name oid change.path %}">{{ change.path }}</a></td>
+            {% else %}
+            <td>{{ change.path }}</td>
+            {% endif %}
+            <pre class="diff patch-text">{{ change.patch }}</pre>
+            {% endif %}
+        {% endfor %}
+    </article>
+    <script>
+        var patches = document.getElementsByClassName("patch-text");
+        for (let i = 0; i < patches.length; i++) {
+            hljs.highlightElement(patches[i]);
+        }
+    </script>
+</main>
+{% endblock %}

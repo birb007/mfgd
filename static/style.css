@@ -27,6 +27,16 @@ a:hover {
     vertical-align: center;
 }
 
+.controls ol {
+    display: flex;
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.menu a,p {
+    padding: 10px;
+}
+
 /* "Normal" menu items */
 #menu a, #menu span {
     float: left;
@@ -72,7 +82,6 @@ a:hover {
     border-top: 1px solid black;
     border-bottom: 1px solid black;
     width: 100%;
-    table-layout:fixed;
     text-overflow:ellipsis;
     overflow:hidden;
 }
@@ -99,6 +108,8 @@ main {
     padding-right: 1ch;
     align: left;
     float: left;
+    width: 15px;
+    height: 15px;
 }
 
 .current-branch img {
