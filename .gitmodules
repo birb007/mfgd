@@ -1,0 +1,3 @@
+[submodule "pygit2"]
+	path = pygit2
+	url = https://github.com/birb007/mfgd_pygit2
