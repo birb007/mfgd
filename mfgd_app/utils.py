@@ -7,15 +7,16 @@ from mfgd_app.types import ObjectType, TreeEntry
 # Pre-compiled regex for speed
 split_path_re = re.compile(r"/?([^/]+)/?")
 
+
 def split_path(path):
-    """Robust, regex-based, path splitter
-    """
+    """Robust, regex-based, path splitter"""
     return split_path_re.findall(path)
 
+
 def normalize_path(path):
-    """Normalize user-provided path
-    """
+    """Normalize user-provided path"""
     return "/".join(split_path(path))
+
 
 def resolve_path(subtree, path):
     path = path.strip("/")
@@ -97,8 +98,8 @@ def tree_entries(repo, target, tree, path):
         wrapper = TreeEntry(entry, change, entry_path)
         clean_entries.append(wrapper)
 
-    clean_entries.sort(key=lambda entry: entry.name) # secondary sort by name
-    clean_entries.sort(key=lambda entry: entry.type) # primary sort by type
+    clean_entries.sort(key=lambda entry: entry.name)  # secondary sort by name
+    clean_entries.sort(key=lambda entry: entry.type)  # primary sort by type
     return clean_entries
 
 

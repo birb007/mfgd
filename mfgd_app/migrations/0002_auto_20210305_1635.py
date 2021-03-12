@@ -7,29 +7,51 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mfgd_app', '0001_initial'),
+        ("mfgd_app", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='repository',
-            options={'verbose_name_plural': 'Repositories'},
+            name="repository",
+            options={"verbose_name_plural": "Repositories"},
         ),
         migrations.CreateModel(
-            name='CanAccess',
+            name="CanAccess",
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('canManage', models.BooleanField(default=False)),
-                ('repo', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mfgd_app.repository')),
-                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mfgd_app.userprofile')),
+                (
+                    "id",
+                    models.AutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("canManage", models.BooleanField(default=False)),
+                (
+                    "repo",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="mfgd_app.repository",
+                    ),
+                ),
+                (
+                    "user",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        to="mfgd_app.userprofile",
+                    ),
+                ),
             ],
             options={
-                'unique_together': {('user', 'repo')},
+                "unique_together": {("user", "repo")},
             },
         ),
         migrations.AddField(
-            model_name='userprofile',
-            name='repositories',
-            field=models.ManyToManyField(through='mfgd_app.CanAccess', to='mfgd_app.Repository'),
+            model_name="userprofile",
+            name="repositories",
+            field=models.ManyToManyField(
+                through="mfgd_app.CanAccess", to="mfgd_app.Repository"
+            ),
         ),
     ]

@@ -14,12 +14,12 @@ from mfgd_app import utils
 from mfgd_app.types import ObjectType, TreeEntry, FileChange
 from mfgd_app.models import Repository
 
+
 def default_branch(db_repo_obj):
     # NOTE: someone please fix this if you can, but the pygit2 API does not
     # provide access to the global HEAD as it's not a proper ref
     with open(db_repo_obj.path + "/.git/HEAD") as f:
         return f.read().split("/")[-1]
-
 
 
 def index(request):
@@ -31,8 +31,8 @@ def index(request):
         # Only select the first 30 chacters in case of overflow
         repo_list[i].description = repo_list[i].description[0:30]
     # Load the repos data here
-    context_dict['repositories'] = repo_list
-    return render(request, 'index.html', context_dict)
+    context_dict["repositories"] = repo_list
+    return render(request, "index.html", context_dict)
 
 
 def read_blob(blob):
@@ -62,11 +62,10 @@ def gen_crumbs(repo_name, oid, path):
     crumbs = []
     parts = utils.split_path(path)
     for off in range(len(parts)):
-        relative_path = "/".join(parts[:off + 1]) + "/"
-        url = urls.reverse("view",
-                kwargs={ "repo_name": repo_name,
-                         "oid": oid,
-                         "path": relative_path })
+        relative_path = "/".join(parts[: off + 1]) + "/"
+        url = urls.reverse(
+            "view", kwargs={"repo_name": repo_name, "oid": oid, "path": relative_path}
+        )
         crumbs.append(Crumb(parts[off], url))
     return crumbs
 
@@ -80,7 +79,8 @@ def gen_branches(repo_name, repo, oid):
     if oid not in l:
         l.append(oid)
 
-    return [ Branch(name, f"/{repo_name}/view/" + name) for name in l ]
+    return [Branch(name, f"/{repo_name}/view/" + name) for name in l]
+
 
 def view(request, repo_name, oid, path):
     # Find the repo object in the db
@@ -101,12 +101,12 @@ def view(request, repo_name, oid, path):
         return HttpResponse("Invalid path")
 
     context = {
-                "repo_name": repo_name,
-                "oid": oid,
-                "path": path,
-                "branches": gen_branches(repo_name, repo, oid),
-                "crumbs": gen_crumbs(repo_name, oid, path),
-                }
+        "repo_name": repo_name,
+        "oid": oid,
+        "path": path,
+        "branches": gen_branches(repo_name, repo, oid),
+        "crumbs": gen_crumbs(repo_name, oid, path),
+    }
     # Display correct template
     if obj.type == ObjectType.TREE:
         template = "tree.html"
@@ -120,11 +120,11 @@ def view(request, repo_name, oid, path):
 
 
 def user_login(request):
-    if request.method == 'POST':
+    if request.method == "POST":
 
         # Get the form details and check if they match the data in the database
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.POST.get("username")
+        password = request.POST.get("password")
 
         user = authenticate(username=username, password=password)
 
@@ -142,7 +142,7 @@ def user_login(request):
             return HttpResponse("Invalid login details supplied.")
 
     else:
-        return render(request, 'login.html')
+        return render(request, "login.html")
 
 
 @login_required
@@ -166,7 +166,8 @@ def info(request, repo_name, oid):
 
     changes = []
     timestamp = dt.datetime.utcfromtimestamp(commit.commit_time).strftime(
-            "%Y-%m-%d %H:%M:%S")
+        "%Y-%m-%d %H:%M:%S"
+    )
     message_subject, message_body = commit.message.split("\n", maxsplit=1)
 
     # not initial commit
@@ -192,8 +193,10 @@ def info(request, repo_name, oid):
                 continue
             patch = utils.get_patch(repo, entry.entry)
             changes.append(
-                    FileChange(patch, "A", pygit2.GIT_DELTA_ADDED, entry.path,
-                        entry.entry, None))
+                FileChange(
+                    patch, "A", pygit2.GIT_DELTA_ADDED, entry.path, entry.entry, None
+                )
+            )
 
     context = {
         "repo_name": repo_name,

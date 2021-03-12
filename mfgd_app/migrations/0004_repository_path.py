@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mfgd_app', '0003_auto_20210305_1637'),
+        ("mfgd_app", "0003_auto_20210305_1637"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='repository',
-            name='path',
+            model_name="repository",
+            name="path",
             field=models.TextField(blank=True),
         ),
     ]

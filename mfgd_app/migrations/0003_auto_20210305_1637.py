@@ -6,12 +6,12 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('mfgd_app', '0002_auto_20210305_1635'),
+        ("mfgd_app", "0002_auto_20210305_1635"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='canaccess',
-            options={'verbose_name_plural': 'CanAccess'},
+            name="canaccess",
+            options={"verbose_name_plural": "CanAccess"},
         ),
     ]

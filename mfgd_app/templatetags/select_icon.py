@@ -4,8 +4,9 @@ from mfgd_app.types import ObjectType
 
 register = template.Library()
 
+
 @register.inclusion_tag("icon.html")
-def select_icon (entry):
+def select_icon(entry):
     context = {}
     if entry.type == ObjectType.BLOB:
         context["alt"] = "blob"

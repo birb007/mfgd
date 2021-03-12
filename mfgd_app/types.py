@@ -5,6 +5,7 @@ from mfgd_app import utils
 
 import pygit2
 
+
 class ObjectType(IntEnum):
     COMMIT = 1
     TREE = 2
@@ -30,6 +31,7 @@ class TreeEntry:
 
         if entry.type == ObjectType.BLOB:
             self.is_binary = entry.is_binary
+
 
 class FileChange:
     def __init__(self, patch, status_char, status, path, new_blob, old_blob):
