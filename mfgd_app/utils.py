@@ -2,6 +2,8 @@ import binascii
 import re
 import string
 
+import pygit2
+
 from mfgd_app.types import ObjectType, TreeEntry
 
 # Pre-compiled regex for speed
@@ -39,11 +41,14 @@ def resolve_path(subtree, path):
 
 def get_file_history(repo, commit, path):
     path = path.lstrip("/")
-    for old_commit in repo.walk(commit):
-        diff = repo.diff(commit, old_commit)
+
+    parent = commit
+    for commit in repo.walk(commit):
+        diff = repo.diff(commit, parent)
         for delta in diff.deltas:
             if delta.new_file.path == path:
-                return old_commit
+                return parent
+        parent = commit
     return None
 
 
