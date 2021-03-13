@@ -177,6 +177,9 @@ def info(request, repo_name, oid):
             new = repo.get(delta.new_file.id)
             old = repo.get(delta.old_file.id)
 
+            if new is None and old is None:
+                continue
+
             status_char = delta.status_char()
             status = delta.status
 
@@ -210,3 +213,11 @@ def info(request, repo_name, oid):
         "message_body": message_body,
     }
     return render(request, "commit.html", context=context)
+
+
+def error_404(request, exception):
+    return render(request, "404.html", {})
+
+
+def error_500(request):
+    return render(request, "500.html", {})

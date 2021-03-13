@@ -13,9 +13,12 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from mfgd_app import views
+
 from django.contrib import admin
 from django.urls import path, re_path
-from mfgd_app import views
+from django.conf.urls import handler404
+
 
 urlpatterns = [
     path("", views.index, name="index"),
@@ -27,3 +30,6 @@ urlpatterns = [
     path("logout/", views.user_logout, name="logout"),
     path("login/", views.user_login, name="login"),
 ]
+
+handler404 = views.error_404
+handler500 = views.error_500
