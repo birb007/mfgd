@@ -8,20 +8,23 @@
 {% endblock %}
 
 {% block body_block %}
-    <main>
-        <article>
-            {% if code %}
-            <table id="hex-dump">
-                {% for offset, chunks, ascii in code %}
-                <tr>
-                    <td>{{ offset }}</td>
-                    <td>{{ chunks }}</td>
-                    <td>{{ ascii }}</td>
-                {% endfor %}
-            </table>
-            {% else %}
-            File too large to be displayed.
-            {% endif %}
-        </article>
-    </main>
+<main>
+    <pre>Last Change
+Committer: {{ change.committer.name }} &lt;{{ change.committer.email }}&gt;
+Commit: [<a href="{% url 'info' repo_name change.id %}">{{ change.short_id }}</a>] {{ change_subject }}</pre>
+    <article>
+        {% if code %}
+        <table id="hex-dump">
+            {% for offset, chunks, ascii in code %}
+            <tr>
+                <td>{{ offset }}</td>
+                <td>{{ chunks }}</td>
+                <td>{{ ascii }}</td>
+            {% endfor %}
+        </table>
+        {% else %}
+        File too large to be displayed.
+        {% endif %}
+    </article>
+</main>
 {% endblock %}

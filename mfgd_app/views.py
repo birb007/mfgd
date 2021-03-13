@@ -113,6 +113,9 @@ def view(request, repo_name, oid, path):
         context["entries"] = utils.tree_entries(repo, target, obj, path)
     elif obj.type == ObjectType.BLOB:
         template, context["code"] = read_blob(obj)
+        commit = utils.get_file_history(repo, target, path)
+        context["change"] = commit
+        context["change_subject"] = commit.message.split("\n")[0]
     else:
         return HttpResponse("Unsupported object type")
 

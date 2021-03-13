@@ -4,6 +4,9 @@
 {% block body_block %}
 {% include "crumbs.html" %}
 <main>
+    <pre>Last Change
+Committer: {{ change.committer.name }} &lt;{{ change.committer.email }}&gt;
+Commit: [<a href="{% url 'info' repo_name change.id %}">{{ change.short_id }}</a>] {{ change_subject }}</pre>
     <article>
         {% if code %}
         <pre><code id="highlight_code">{{ code }}</code></pre>

@@ -42,7 +42,10 @@ def resolve_path(subtree, path):
 def get_file_history(repo, commit, path):
     path = path.lstrip("/")
 
+    if isinstance(commit, pygit2.Commit):
+        commit = commit.id
     parent = commit
+
     for commit in repo.walk(commit):
         diff = repo.diff(commit, parent)
         for delta in diff.deltas:
