@@ -43,3 +43,16 @@ class FileChange:
         _, insert, delete = patch.line_stats
         self.insertion = f"++{insert}"
         self.deletion = f"--{delete}"
+
+
+class Commit:
+    def __init__(self, commit):
+        self.commit = commit
+        self.id = commit.id
+        self.short_id = commit.short_id
+        self.subject = commit.message.split("\n")[0]
+        self.committer_name = commit.committer.name
+        self.committer_email = commit.committer.email
+
+        timestamp = datetime.utcfromtimestamp(commit.commit_time)
+        self.timestamp = timestamp.strftime("%Y-%m-%d %H:%M:%S")

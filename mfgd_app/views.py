@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 import pygit2
 
 from mfgd_app import utils
-from mfgd_app.types import ObjectType, TreeEntry, FileChange
+from mfgd_app.types import ObjectType, TreeEntry, FileChange, Commit
 from mfgd_app.models import Repository
 from mfgd_app.forms import UserForm
 
@@ -238,6 +238,28 @@ def info(request, repo_name, oid):
         "message_body": message_body,
     }
     return render(request, "commit.html", context=context)
+
+
+def chain(request, repo_name, oid):
+    db_repo_obj = Repository.objects.get(name=repo_name)
+    # Open a pygit2 repo object to the requested repo
+    repo = pygit2.Repository(db_repo_obj.path)
+
+    obj = utils.find_branch_or_commit(repo, oid)
+    if obj is None:
+        return HttpResponse("Invalid branch or commit ID")
+    elif isinstance(obj, pygit2.Branch):
+        commit = repo.get(pygti2.Branch.target)
+    else:
+        commit = obj
+
+    commits = [Commit(c) for c in repo.walk(commit.id)]
+    context = {
+        "repo_name": repo_name,
+        "oid": oid,
+        "commits": commits
+    }
+    return render(request, "chain.html", context=context)
 
 
 def error_404(request, exception):

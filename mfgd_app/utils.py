@@ -118,4 +118,4 @@ def get_patch(repo, new=None, old=None):
         return old.diff(new)
     if new is None:
         return old.diff()
-    return new.diff(old)
+    return old.diff(new)
