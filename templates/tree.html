@@ -3,34 +3,34 @@
 
 {% block body_block %}
 
-    {% load select_icon %}
-    {% include "crumbs.html" %}
-    <main>
-        <article>
-            <table id="mfgd-table">
-                <tr class="underline">
-                    <td>Name</td>
-                    <td>Last change message</td>
-                    <td>Last change id</td>
-                    <td>Last change date</td>
-                </tr>
-                {% for entry in entries %}
-                <tr>
-                    <td class="{{ entry.type_str }}"><a href="{{ entry.name }}/">
-                    {% select_icon entry %}
-                    {{ entry.name }}</a></td>
-                    <td class="commit-msg">{{ entry.last_change.message }}</a></td>
-                    {% if entry.last_change %}
-                    <td class="commit-id"><a class="commit" href="{% url 'info' repo_name entry.last_change_id %}">{{ entry.last_change.short_id }}</a></td>
-                    {% else %}
-                    <td class="commit-id">{{ entry.last_change.short_id }}</td>
-                    {% endif %}
-                    <td class="commit-date">
-                        <time datetime="{{ entry.change_time }}">{{ entry.change_time }}</time>
-                    </td>
-                </tr>
-                {% endfor %}
-            </table>
-        </article>
-    </main>
+{% load select_icon %}
+{% include "crumbs.html" %}
+<main>
+    <article>
+        <table id="mfgd-table">
+            <tr class="underline">
+                <td>Name</td>
+                <td>Last change message</td>
+                <td>Last change id</td>
+                <td>Last change date</td>
+            </tr>
+            {% for entry in entries %}
+            <tr>
+                <td class="{{ entry.type_str }}"><a href="{{ entry.name }}/">
+                {% select_icon entry %}
+                {{ entry.name }}</a></td>
+                <td class="commit-msg">{{ entry.last_change.message }}</a></td>
+                {% if entry.last_change %}
+                <td class="commit-id"><a class="commit" href="{% url 'info' repo_name entry.last_change_id %}">{{ entry.last_change.short_id }}</a></td>
+                {% else %}
+                <td class="commit-id">{{ entry.last_change.short_id }}</td>
+                {% endif %}
+                <td class="commit-date">
+                    <time datetime="{{ entry.change_time }}">{{ entry.change_time }}</time>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    </article>
+</main>
 {% endblock %}

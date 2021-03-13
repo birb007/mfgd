@@ -26,6 +26,11 @@
 				<a href="{% url 'login' %}">Login</a>
             	<a href="{% url 'register' %}">Register</a>
 			{% endif %}
+            {% if repo_name %}
+            <a href="{% url 'index' %}">Index</a>
+            <a href="{% url 'view' repo_name oid '' %}">Tree</a>
+            <a href="{% url 'chain' repo_name oid %}">Commits</a>
+            {% endif %}
         </nav>
 
 		{% block body_block %}
