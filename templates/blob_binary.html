@@ -28,10 +28,12 @@ Binary - {{ path }}
 <div class="blob_box">
     {% if code %}
     <table id="hex-dump">
-        {% for offset, chunks, ascii in code %}
+        {% for offset, cols, ascii in code %}
         <tr>
             <td>{{ offset }}</td>
-            <td>{{ chunks }}</td>
+            {% for col in cols %}
+            <td>{{ col }}</td>
+            {% endfor %}
             <td>{{ ascii }}</td>
         {% endfor %}
     </table>

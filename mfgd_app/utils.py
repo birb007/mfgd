@@ -70,9 +70,9 @@ def find_branch_or_commit(repo, oid):
 
 
 def hex_dump(binary):
-    FMT = "{offset:08x}: {chunks} | {ascii}"
-    ALLOWED_CHARS = set(string.ascii_letters + string.digits + string.punctuation + " ")
-    N_BYTES_ROW = 32
+    ALLOWED_CHARS = set(string.ascii_letters + string.digits + string.punctuation)
+    N_BYTES_ROW = 16
+    N_BYTES_COL = 8
     N_BYTES_CHUNK = 1
 
     rows = []
@@ -89,8 +89,12 @@ def hex_dump(binary):
                     ascii += "."
             chunks.append(binascii.b2a_hex(chunk).decode())
 
+        cols = []
+        for col_off in range(0, len(chunks), N_BYTES_COL):
+            cols.append(" ".join(chunks[col_off : col_off + N_BYTES_COL]))
+
         offset = "{:08x}".format(row_off)
-        rows.append((offset, " ".join(chunks), ascii))
+        rows.append((offset, cols, ascii))
     return rows
 
 
