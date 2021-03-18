@@ -32,6 +32,11 @@ a:hover {
     text-decoration: underline;
 }
 
+img {
+    /* IE8 puts borders around images ;( */
+    border-width: 0;
+}
+
 /* Navigation bar */
 #global_nav {
     overflow: hidden;

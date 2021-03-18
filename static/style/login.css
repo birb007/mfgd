@@ -3,7 +3,7 @@
  */
 
 #global_center {
-    min-width: initial;
+    min-width: 0%;
 }
 
 .login_msg {
