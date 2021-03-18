@@ -114,7 +114,10 @@ def view(request, repo_name, oid, path):
         context["entries"] = utils.tree_entries(repo, target, obj, path)
     elif obj.type == ObjectType.BLOB:
         template, code = read_blob(obj)
-        context["code"] = utils.highlight_code(path, code)
+        if template == "blob.html":
+            context["code"] = utils.highlight_code(path, code)
+        else:
+            context["code"] = code
         commit = utils.get_file_history(repo, target, path)
         context["change"] = commit
         context["change_subject"] = commit.message.split("\n")[0]
