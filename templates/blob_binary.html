@@ -1,30 +1,43 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% include "crumbs.html" %}
+{% block title_block %}
+Binary - {{ path }}
+{% endblock %}
 
 {% block head_block %}
-    <link rel="stylesheet" href="{% static 'hex.css' %}">
+<link rel="stylesheet" href="{% static 'style/crumbs.css' %}">
+<link rel="stylesheet" href="{% static 'style/blob.css' %}">
+<link rel="stylesheet" href="{% static 'style/hex.css' %}">
 {% endblock %}
 
 {% block body_block %}
-<main>
-    <pre>Last Change
-Committer: {{ change.committer.name }} &lt;{{ change.committer.email }}&gt;
-Commit: [<a href="{% url 'info' repo_name change.id %}">{{ change.short_id }}</a>] {{ change_subject }}</pre>
-    <article>
-        {% if code %}
-        <table id="hex-dump">
-            {% for offset, chunks, ascii in code %}
-            <tr>
-                <td>{{ offset }}</td>
-                <td>{{ chunks }}</td>
-                <td>{{ ascii }}</td>
-            {% endfor %}
-        </table>
-        {% else %}
-        File too large to be displayed.
-        {% endif %}
-    </article>
-</main>
+{% include "crumbs.html" %}
+
+<table class="blob_box">
+    <tr>
+        <td>{{ change_subject }}
+            [<a href="{% url 'info' repo_name change.id %}">{{ change.short_id }}</a>]
+        </td>
+    </tr>
+    <tr>
+        <td>{{ change.committer.name }} &lt;{{ change.committer.email }}&gt;</td>
+    </tr>
+</table>
+
+<div class="blob_box">
+    {% if code %}
+    <table id="hex-dump">
+        {% for offset, chunks, ascii in code %}
+        <tr>
+            <td>{{ offset }}</td>
+            <td>{{ chunks }}</td>
+            <td>{{ ascii }}</td>
+        {% endfor %}
+    </table>
+    {% else %}
+    File too large to be displayed.
+    {% endif %}
+</div>
+
 {% endblock %}

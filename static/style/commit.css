@@ -1,0 +1,58 @@
+/*
+ * Commit page style
+ */
+
+.commit_box {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid gray;
+    border-radius: 3px;
+}
+
+/* Info */
+.commit_info {
+    vertical-align: middle;
+    display: inline-block;
+}
+
+.commit_msg {
+    padding-top: 10px;
+}
+
+.commit_inspect {
+    float: right;
+    display: inline-block;
+    padding: 10px;
+    color: white;
+    background: #1fbfa7;
+    border: 1px solid #199481;
+    border-radius: 5px;
+}
+
+.commit_modified {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+}
+
+.commit_modified td {
+    padding: 10px;
+    border-top: 1px solid #e3e3e3;
+    border-bottom: 1px solid #e3e3e3;
+}
+
+/* Patches */
+.commit_path {
+    padding: 10px;
+    display: block;
+}
+
+.commit_text {
+    display: inline-block;
+}
+
+.commit_text,
+.commit_text * {
+    font-family: monospace;
+}

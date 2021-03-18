@@ -1,27 +1,27 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title_block %}
+Commits
+{% endblock %}
+
 {% block body_block %}
-<main>
-    <article>
-        <table id="mfgd-table">
-            <tr class="underline">
-                <th>Hash</th>
-                <th>Subject</th>
-                <th>Author</th>
-                <th>Date</th>
-            </tr>
-            {% for commit in commits %}
-            <tr>
-                <td class="commit-id"><a href="{% url 'info' repo_name commit.short_id %}">{{ commit.short_id }}</a></td>
-                <td class="commit-msg">{{ commit.subject }}</td>
-                <td>{{ commit.committer_name }}</td>
-                <td class="commit-date">
-                    <time datetime="{{ commit.timestamp }}">{{ commit.timestamp }}</time>
-                </td>
-            </tr>
-            {% endfor %}
-        </table>
-    </article>
-</main>
+<table class="mfgd_table">
+    <tr>
+        <th>Hash</th>
+        <th>Subject</th>
+        <th>Author</th>
+        <th>Date</th>
+    </tr>
+    {% for commit in commits %}
+    <tr>
+        <td class="commit-id"><a href="{% url 'info' repo_name commit.short_id %}">{{ commit.short_id }}</a></td>
+        <td class="commit-msg">{{ commit.subject }}</td>
+        <td>{{ commit.committer_name }}</td>
+        <td class="commit-date">
+            <time datetime="{{ commit.timestamp }}">{{ commit.timestamp }}</time>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
 {% endblock %}

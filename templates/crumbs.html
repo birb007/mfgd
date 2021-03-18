@@ -1,25 +1,17 @@
 {% load static %}
-<nav class="crumbs">
-    <ol>
-        <li>
-            <select name="branches" id="switch-branch" onchange="window.location.href = this.value;">
-                {% for branch in branches %}
-                {% if branch.name == oid %}
-                <option class="branch" value="{{ branch.url }}" selected>{{ branch.name }}</option>
-                {% else %}
-                <option class="branch" value="{{ branch.url }}">{{ branch.name }}</option>
-                {% endif %}
-                {% endfor %}
-            </select>
-        </li>
-        <li class="crumb">
-            <a class="branch current-branch" href="/{{ repo_name }}/view/{{ oid }}">{{ oid }}<img class="icon" src="{% static 'icons/tree.png' %}" alt="branch" /></a>
-        </li>
-        {% for crumb in crumbs %}
-        <li class="crumb">
-            <a class="subtree" href="{{ crumb.url }}">{{ crumb.name }}</a>
-        </li>
+<div id="crumbs_nav">
+    <select class="crumb_select" onchange="window.location.href = this.value;">
+        {% for branch in branches %}
+        {% if branch.name == oid %}
+        <option class="branch" value="{{ branch.url }}" selected>{{ branch.name }}</option>
+        {% else %}
+        <option class="branch" value="{{ branch.url }}">{{ branch.name }}</option>
+        {% endif %}
         {% endfor %}
-    </ol>
-</nav>
+    </select>
+    <a class="crumb_branch" class="crumb" href="/{{ repo_name }}/view/{{ oid }}"><img class="icon" src="{% static 'icons/branch.png' %}" alt="branch" /> {{ oid }}</a>
+    {% for crumb in crumbs %}
+    <a class="crumb_path" href="{{ crumb.url }}">{{ crumb.name }}</a>
+    {% endfor %}
+</div>
 

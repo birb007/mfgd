@@ -2,41 +2,39 @@
 {% load static %}
 
 <html>
-
-	<head lan="eng">
-		<meta charset="utf-8">
-		<title>Tree</title>
+	<head>
+		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-        <!-- Page style !-->
-        <link rel="stylesheet" href="{% static 'style.css' %}">
-        <!-- highlight.js !-->
-        <link rel="stylesheet" href="{% static 'highlight/vs.css' %}">
-        <script src="{% static 'highlight/highlight.min.js' %}"></script>
-
-        {% block head_block %}
-        {% endblock %}
+        <!-- Page title !-->
+		<title>{% block title_block %}$PLACEHOLDER_TITLE${% endblock %}</title>
+        <!-- Global style !-->
+        <link rel="stylesheet" href="{% static 'style/global.css' %}" />
+        <!-- Page specific headers !-->
+        {% block head_block %}{% endblock %}
 	</head>
 
 	<body>
-		<nav id="menu">
+		<div id="global_nav">
 			{% if user.is_authenticated %}
 				<span>Hello: {{ user.username }}</span>
 				<a class="right" href="{% url 'logout' %}">Logout</a>
 			{% else %}
-				<a href="{% url 'login' %}">Login</a>
-            	<a href="{% url 'register' %}">Register</a>
+				<a class="right" href="{% url 'login' %}">Login</a>
+            	<a class="right" href="{% url 'register' %}">Register</a>
 			{% endif %}
+            <a href="{% url 'index' %}">Dashboard</a>
             {% if repo_name %}
-            <a href="{% url 'index' %}">Index</a>
             <a href="{% url 'view' repo_name oid '' %}">Tree</a>
             <a href="{% url 'chain' repo_name oid %}">Commits</a>
             {% endif %}
-        </nav>
+        </div>
 
-		{% block body_block %}
-			This is the body_block's default content.
-		{% endblock %}
-
+        <div id="global_wrap">
+            <div id="global_center">
+        		{% block body_block %}
+        			$PLACEHOLDER_BODY$
+        		{% endblock %}
+            </div>
+        </div>
 	</body>
-
 </html>

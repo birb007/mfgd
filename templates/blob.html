@@ -1,23 +1,44 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title_block %}
+File - {{ path }}
+{% endblock %}
+
+{% block head_block %}
+<link rel="stylesheet" href="{% static 'style/crumbs.css' %}" />
+<link rel="stylesheet" href="{% static 'style/blob.css' %}" />
+<!-- highlight.js !-->
+<link rel="stylesheet" href="{% static 'highlight/vs.css' %}">
+<script src="{% static 'highlight/highlight.min.js' %}"></script>
+{% endblock %}
+
 {% block body_block %}
+
 {% include "crumbs.html" %}
-<main>
-    <pre>Last Change
-Committer: {{ change.committer.name }} &lt;{{ change.committer.email }}&gt;
-Commit: [<a href="{% url 'info' repo_name change.id %}">{{ change.short_id }}</a>] {{ change_subject }}</pre>
-    <article>
-        {% if code %}
-        <pre><code id="highlight_code">{{ code }}</code></pre>
-        <script>
-            var code = document.getElementById("highlight_code");
-            code.classList.add("{{ path }}".split('.').pop());
-            hljs.highlightAll();
-        </script>
-        {% else %}
-        File too large to be displayed.
-        {% endif %}
-    </article>
-</main>
+
+<table class="blob_box">
+    <tr>
+        <td>{{ change_subject }}
+            [<a href="{% url 'info' repo_name change.id %}">{{ change.short_id }}</a>]
+        </td>
+    </tr>
+    <tr>
+        <td>{{ change.committer.name }} &lt;{{ change.committer.email }}&gt;</td>
+    </tr>
+</table>
+
+<div class="blob_box">
+    {% if code %}
+    <pre><code id="hljs_code">{{ code }}</code></pre>
+    <script>
+        var code = document.getElementById("hljs_code");
+        code.classList.add("{{ path }}".split('.').pop());
+        hljs.highlightAll();
+    </script>
+    {% else %}
+    File too large to be displayed.
+    {% endif %}
+</div>
+
 {% endblock %}

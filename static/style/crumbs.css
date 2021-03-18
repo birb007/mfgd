@@ -1,0 +1,28 @@
+/*
+ * Crumbs menu style
+ */
+
+#crumbs_nav {
+    padding: 20px 0;
+}
+
+.crumb_select {
+    width: 150px;
+    margin-right: 10px;
+}
+
+.crumb_branch {
+    color: #474747;
+}
+
+.crumb_branch::after {
+    content: " /";
+}
+
+.crumb_path {
+    color: black;
+}
+
+.crumb_path::after {
+    content: " /";
+}

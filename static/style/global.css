@@ -1,0 +1,93 @@
+/*
+ * Global page style
+ */
+
+* {
+    box-sizing: border-box;
+    font-family: sans-serif;
+    font-size: 12pt;
+    padding: 0px;
+    margin: 0px;
+    color: black;
+}
+
+h1 {
+    font-size: 200%;
+}
+
+body {
+    background: #fcfcfc;
+}
+
+a {
+    text-decoration: none;
+    color: #0044ff;
+}
+
+a * {
+    vertical-align: middle;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Navigation bar */
+#global_nav {
+    overflow: hidden;
+    padding: 10px;
+    width: 100%;
+    background: #363636;
+    position: fixed;
+}
+
+#global_nav * {
+    color: white;
+}
+
+#global_nav a,
+#global_nav span {
+    padding: 10px;
+    display: block;
+    float: left;
+}
+
+#global_nav .right {
+    float: right;
+}
+
+/* Content */
+#global_wrap {
+    padding-top: 4em; /* FIXME: is there a way to not hardcode this? */
+    text-align: center;
+}
+
+#global_center {
+    display: inline-block;
+    text-align: left;
+    min-width: 50%;
+    padding: 50px;
+}
+
+/* Content table (both index page and tree) */
+.mfgd_table {
+    width: 100%;
+    border: 1px solid gray;
+    border-radius: 3px;
+    border-spacing: 0px;
+}
+
+.mfgd_table th,
+.mfgd_table td {
+    padding: 12px;
+}
+
+.mfgd_table th {
+    background: #363636;
+    color: white;
+}
+
+.mfgd_table td {
+    border-top: 1px solid #e3e3e3;
+}
+

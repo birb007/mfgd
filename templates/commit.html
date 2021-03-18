@@ -1,56 +1,68 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title_block %}
+Commit info - {{ oid }}
+{% endblock %}
+
+{% block head_block %}
+<link rel="stylesheet" href="{% static 'style/commit.css' %}" />
+<!-- highlight.js !-->
+<link rel="stylesheet" href="{% static 'highlight/vs.css' %}">
+<script src="{% static 'highlight/highlight.min.js' %}"></script>
+{% endblock %}
+
 {% block body_block %}
 
-<nav class="controls">
-    <ol>
-        <li><img class="icon" src="{% static 'icons/commit.png' %}"/></li>
-        <li><a href="{% url 'view' repo_name oid '' %}">Inspect Tree</a></li>
-    </ol>
-</nav>
+<div class="commit_box">
+    <table class="commit_info">
+        <tr>
+            <td>From:</td>
+            <td>{{ author.name }} &lt;{{ author.email}}&gt;</td>
+        </tr>
+        <tr>
+            <td>Date:</td>
+            <td>{{ commit_timestamp }}</td>
+        </tr>
+        <tr>
+            <td class="commit_msg" colspan="2">{{ message }}</td>
+        </tr>
+    </table>
+    <a class="commit_inspect" href="{% url 'view' repo_name oid '' %}">Inspect Tree</a>
+    <table class="commit_modified">
+    {% for change in changes %}
+    <tr>
+        <td>{{ change.status }}</td>
+        <td>{{ change.insertion }}</td>
+        <td>{{ change.deletion }}</td>
+        {% if not change.deleted %}
+        <td><a href="{% url 'view' repo_name oid change.path %}">{{ change.path }}</a></td>
+        {% else %}
+        <td>{{ change.path }}</td>
+        {% endif %}
+    </tr>
+    {% endfor %}
+    </table>
+</div>
 
-<main>
-    <article>
-        <ul>
-            <li>From: {{ author.name }} &lt;{{ author.email}}&gt;</li>
-            <li>Date: {{ commit_timestamp }}</li>
-        </ul>
-        <pre class class="text">{{ message }}</pre>
-        Modified Files:
-        <table>
-            {% for change in changes %}
-            <tr>
-                <td>{{ change.status }}</td>
-                <td>{{ change.insertion }}</td>
-                <td>{{ change.deletion }}</td>
-                {% if not change.deleted %}
-                <td><a href="{% url 'view' repo_name oid change.path %}">{{ change.path }}</a></td>
-                {% else %}
-                <td>{{ change.path }}</td>
-                {% endif %}
-            </tr>
-            {% endfor %}
-        </table>
-    </article>
-    <article>
-        Patches:
-        {% for change in changes %}
-            {% if change.patch %}
-            {% if not change.deleted %}
-            <td><a href="{% url 'view' repo_name oid change.path %}">{{ change.path }}</a></td>
-            {% else %}
-            <td>{{ change.path }}</td>
-            {% endif %}
-            <pre class="diff patch-text">{{ change.patch }}</pre>
-            {% endif %}
-        {% endfor %}
-    </article>
-    <script>
-        var patches = document.getElementsByClassName("patch-text");
-        for (let i = 0; i < patches.length; i++) {
-            hljs.highlightElement(patches[i]);
-        }
-    </script>
-</main>
+{% for change in changes %}
+    {% if change.patch %}
+    <div class="commit_box">
+        {% if not change.deleted %}
+        <a class="commit_path" href="{% url 'view' repo_name oid change.path %}">{{ change.path }}</a>
+        {% else %}
+        <span class="commit_path">{{ change.path }}</span>
+        {% endif %}
+        <pre class="diff commit_text">{{ change.patch }}</pre>
+    </div>
+    {% endif %}
+{% endfor %}
+</div>
+
+<script>
+    var patches = document.getElementsByClassName("commit_text");
+    for (let i = 0; i < patches.length; i++) {
+        hljs.highlightElement(patches[i]);
+    }
+</script>
 {% endblock %}

@@ -1,0 +1,20 @@
+/*
+ * Blob page style
+ */
+
+.blob_box {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid gray;
+    border-radius: 3px;
+}
+
+#hljs_code,
+#hljs_code * {
+    font-family: monospace;
+}
+
+.line-no {
+    user-select: none;
+}

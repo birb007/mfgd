@@ -1,0 +1,16 @@
+#hex-dump {
+    border: 0px;
+    border-spacing: 0px;
+}
+
+#hex-dump * {
+    font-family: monospace;
+}
+
+#hex-dump td {
+    padding-right: 20px;
+}
+
+#hex-dump td:last-child {
+    padding-right: 0px;
+}

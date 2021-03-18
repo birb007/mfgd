@@ -1,25 +1,28 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block title_block %}
+Dashboard
+{% endblock %}
+
+{% block head_block %}
+<link rel="stylesheet" href="{% static 'style/index.css' %}" />
+{% endblock %}
+
 {% block body_block %}
-	<br>
-	<main>
-        <article>
-            <table id="mfgd-table">
-                <tr class="underline">
-                    <td>Repository</td>
-                    <td>Description</td>
-                    <td>Default branch</td>
-                </tr>
-                {% for repo in repositories %}
-                <tr>
-                    <td><a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a></td>
-                    <td>{{ repo.description }}</td>
-                    <td>{{ repo.default_branch }}</td>
-                </tr>
-                {% endfor %}
-            </table>
-        </article>
-    </main>
+<table class="mfgd_table">
+    <tr>
+        <th>Repository</th>
+        <th>Description</th>
+        <th>Default branch</th>
+    </tr>
+    {% for repo in repositories %}
+    <tr>
+        <td><a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a></td>
+        <td>{{ repo.description }}</td>
+        <td>{{ repo.default_branch }}</td>
+    </tr>
+    {% endfor %}
+</table>
 
 {% endblock %}
