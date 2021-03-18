@@ -18,7 +18,3 @@
 .crumb_path {
     color: black;
 }
-
-.crumb_path::after {
-    content: " /";
-}
