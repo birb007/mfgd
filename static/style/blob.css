@@ -10,8 +10,7 @@
     border-radius: 3px;
 }
 
-#hljs_code,
-#hljs_code * {
+.blob_code * {
     font-family: monospace;
 }
 

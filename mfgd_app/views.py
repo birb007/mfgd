@@ -113,7 +113,8 @@ def view(request, repo_name, oid, path):
         template = "tree.html"
         context["entries"] = utils.tree_entries(repo, target, obj, path)
     elif obj.type == ObjectType.BLOB:
-        template, context["code"] = read_blob(obj)
+        template, code = read_blob(obj)
+        context["code"] = utils.highlight_code(path, code)
         commit = utils.get_file_history(repo, target, path)
         context["change"] = commit
         context["change_subject"] = commit.message.split("\n")[0]
@@ -213,18 +214,18 @@ def info(request, repo_name, oid):
                 path = delta.new_file.path
             else:
                 path = delta.old_file.path
-            changes.append(FileChange(diff, status_char, status, path, new, old))
+            fc = FileChange(diff, status_char, status, path, new, old)
+            fc.patch = utils.highlight_code("name.diff", fc.patch)
+            changes.append(fc)
     # initial commit
     else:
         for entry in utils.tree_entries(repo, commit, commit.tree, "/"):
             if entry.type != ObjectType.BLOB:
                 continue
             patch = utils.get_patch(repo, entry.entry)
-            changes.append(
-                FileChange(
-                    patch, "A", pygit2.GIT_DELTA_ADDED, entry.path, entry.entry, None
-                )
-            )
+            fc = FileChange(patch, "A", pygit2.GIT_DELTA_ADDED, entry.path, entry.entry, None)
+            fc.patch = utils.highlight_code("name.diff", fc.patch)
+            changes.append(fc)
 
     context = {
         "repo_name": repo_name,

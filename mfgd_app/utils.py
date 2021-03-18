@@ -6,6 +6,12 @@ import pygit2
 
 from mfgd_app.types import ObjectType, TreeEntry
 
+from pygments import highlight
+from pygments.lexers import get_lexer_for_filename
+from pygments.formatters import HtmlFormatter
+
+from django.utils.html import escape
+
 # Pre-compiled regex for speed
 split_path_re = re.compile(r"/?([^/]+)/?")
 
@@ -123,3 +129,12 @@ def get_patch(repo, new=None, old=None):
     if new is None:
         return old.diff()
     return old.diff(new)
+
+def highlight_code(filename, code):
+    try:
+        lexer = get_lexer_for_filename(filename, stripall=True)
+    except:
+        lexer = get_lexer_for_filename("name.txt", stripall=True)
+
+    formatter = HtmlFormatter(linenos=True)
+    return highlight(code, lexer, formatter)

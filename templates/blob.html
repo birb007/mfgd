@@ -8,9 +8,7 @@ File - {{ path }}
 {% block head_block %}
 <link rel="stylesheet" href="{% static 'style/crumbs.css' %}" />
 <link rel="stylesheet" href="{% static 'style/blob.css' %}" />
-<!-- highlight.js !-->
-<link rel="stylesheet" href="{% static 'highlight/vs.css' %}">
-<script src="{% static 'highlight/highlight.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'pygments.css' %}" />
 {% endblock %}
 
 {% block body_block %}
@@ -28,14 +26,9 @@ File - {{ path }}
     </tr>
 </table>
 
-<div class="blob_box">
+<div class="blob_box blob_code">
     {% if code %}
-    <pre><code id="hljs_code">{{ code }}</code></pre>
-    <script>
-        var code = document.getElementById("hljs_code");
-        code.classList.add("{{ path }}".split('.').pop());
-        hljs.highlightAll();
-    </script>
+    {{ code | safe }}
     {% else %}
     File too large to be displayed.
     {% endif %}

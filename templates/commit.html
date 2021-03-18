@@ -7,9 +7,7 @@ Commit info - {{ oid }}
 
 {% block head_block %}
 <link rel="stylesheet" href="{% static 'style/commit.css' %}" />
-<!-- highlight.js !-->
-<link rel="stylesheet" href="{% static 'highlight/vs.css' %}">
-<script src="{% static 'highlight/highlight.min.js' %}"></script>
+<link rel="stylesheet" href="{% static 'pygments.css' %}" />
 {% endblock %}
 
 {% block body_block %}
@@ -53,16 +51,9 @@ Commit info - {{ oid }}
         {% else %}
         <span class="commit_path">{{ change.path }}</span>
         {% endif %}
-        <pre class="diff commit_text">{{ change.patch }}</pre>
+        <pre class="diff commit_text">{{ change.patch|safe }}</pre>
     </div>
     {% endif %}
 {% endfor %}
 </div>
-
-<script>
-    var patches = document.getElementsByClassName("commit_text");
-    for (let i = 0; i < patches.length; i++) {
-        hljs.highlightElement(patches[i]);
-    }
-</script>
 {% endblock %}
