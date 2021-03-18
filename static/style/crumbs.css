@@ -15,10 +15,6 @@
     color: #474747;
 }
 
-.crumb_branch::after {
-    content: " /";
-}
-
 .crumb_path {
     color: black;
 }

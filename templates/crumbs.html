@@ -9,9 +9,9 @@
         {% endif %}
         {% endfor %}
     </select>
-    <a class="crumb_branch" class="crumb" href="/{{ repo_name }}/view/{{ oid }}"><img class="icon" src="{% static 'icons/branch.png' %}" alt="branch" /> {{ oid }}</a>
+    <a class="crumb_branch" class="crumb" href="/{{ repo_name }}/view/{{ oid }}"><img class="icon" src="{% static 'icons/branch.png' %}" alt="branch" /> {{ oid }} /</a>
     {% for crumb in crumbs %}
-    <a class="crumb_path" href="{{ crumb.url }}">{{ crumb.name }}</a>
+    <a class="crumb_path" href="{{ crumb.url }}">{{ crumb.name }} /</a>
     {% endfor %}
 </div>
 
