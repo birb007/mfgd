@@ -16,8 +16,8 @@
 	<body>
 		<div id="global_nav">
 			{% if user.is_authenticated %}
-				<span>Hello: {{ user.username }}</span>
 				<a class="right" href="{% url 'logout' %}">Logout</a>
+				<span class="right">Hello: {{ user.username }}</span>
 			{% else %}
 				<a class="right" href="{% url 'login' %}">Login</a>
             	<a class="right" href="{% url 'register' %}">Register</a>
