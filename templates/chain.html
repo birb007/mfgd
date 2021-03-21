@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load fmt_date %}
 
 {% block title_block %}
 Commits
@@ -15,11 +16,11 @@ Commits
     </tr>
     {% for commit in commits %}
     <tr>
-        <td class="commit-id"><a href="{% url 'info' repo_name commit.short_id %}">{{ commit.short_id }}</a></td>
-        <td class="commit-msg">{{ commit.subject }}</td>
-        <td>{{ commit.committer_name }}</td>
+        <td class="commit-id"><a href="{% url 'info' repo_name commit.oid %}">{{ commit.short_oid }}</a></td>
+        <td class="commit-msg">{{ commit.message }}</td>
+        <td>{{ commit.committer.name }}</td>
         <td class="commit-date">
-            <time datetime="{{ commit.timestamp }}">{{ commit.timestamp }}</time>
+            {% fmt_date commit.committer.timestamp %}
         </td>
     </tr>
     {% endfor %}

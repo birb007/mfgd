@@ -18,7 +18,7 @@ File - {{ path }}
 <table class="blob_box">
     <tr>
         <td>{{ change_subject }}
-            [<a href="{% url 'info' repo_name change.id %}">{{ change.short_id }}</a>]
+            [<a href="{% url 'info' repo_name change.oid %}">{{ change.short_oid }}</a>]
         </td>
     </tr>
     <tr>

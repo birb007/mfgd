@@ -2,9 +2,7 @@ import binascii
 import re
 import string
 
-import pygit2
-
-from mfgd_app.types import ObjectType, TreeEntry
+import mpygit
 
 from pygments import highlight
 from pygments.lexers import get_lexer_for_filename
@@ -26,26 +24,41 @@ def normalize_path(path):
     return "/".join(split_path(path))
 
 
-def resolve_path(subtree, path):
+def resolve_path(repo, oid, path):
+    # Resolve tree id
+    tree = repo[oid]
+
+    # Check for root of tree
     path = path.strip("/")
     if path == "":
-        return subtree
+        return tree
 
-    *route, target = path.split("/")
-    for directory in route:
-        for entry in subtree:
-            if entry.name == directory:
-                break
-        else:
+    for path_entry in path.split("/"):
+        if not isinstance(tree, mpygit.Tree):
             return None
-        subtree = entry
+        tree_entry = tree[path_entry]
+        if tree_entry == None:
+            return None
+        tree = repo[tree_entry.oid]
 
-    for entry in subtree:
-        if entry.name == target:
-            return entry
+    return tree
+
+def walk(repo, oid):
+    """Return all commits in the history starting from oid
+    """
+    history = set() # we use a set to avoid duplicate commits from merges
+    parents = [ oid ]
+
+    while len(parents) > 0:
+        cur = repo[parents.pop(0)]
+        history.add(cur)
+        parents += cur.parents
+
+    return sorted(history, reverse=True)
 
 
 def get_file_history(repo, commit, path):
+    return commit
     path = path.lstrip("/")
 
     if isinstance(commit, pygit2.Commit):
@@ -63,14 +76,13 @@ def get_file_history(repo, commit, path):
 
 def find_branch_or_commit(repo, oid):
     try:
-        obj = repo.get(oid)
-        if obj is None or obj.type != ObjectType.COMMIT:
+        obj = repo[oid]
+        if obj is None or not isinstance(obj, mpygit.Commit):
             raise ValueError()
         return obj
     except ValueError:
         try:
-            branch_ref = repo.references[f"refs/heads/{oid}"]
-            return repo.get(branch_ref.target)
+            return repo[repo.heads[oid]]
         except KeyError:
             return None
 
@@ -104,20 +116,19 @@ def hex_dump(binary):
     return rows
 
 
-def tree_entries(repo, target, tree, path):
+def tree_entries(repo, target, tree):
     clean_entries = []
     for entry in tree:
-        # Avoid displaying commit objects which might appear here
-        # (such as when browsing a non-default branch)
-        if entry.type_str != "blob" and entry.type_str != "tree":
-            continue
-        entry_path = normalize_path(path) + "/" + entry.name
-        change = get_file_history(repo, target.id, entry_path)
-        wrapper = TreeEntry(entry, change, entry_path)
-        clean_entries.append(wrapper)
+        entry.last_change = target
+        if not entry.isdir() and not entry.issubmod():
+            blob = repo[entry.oid]
+            entry.is_binary = blob.is_binary
+        clean_entries.append(entry)
 
-    clean_entries.sort(key=lambda entry: entry.name)  # secondary sort by name
-    clean_entries.sort(key=lambda entry: entry.type)  # primary sort by type
+    # secondary sort by name
+    clean_entries.sort(key=lambda entry: entry.name)
+    # primary sort by type
+    clean_entries.sort(key=lambda entry: entry.isdir(), reverse=True)
     return clean_entries
 
 
@@ -135,6 +146,5 @@ def highlight_code(filename, code):
         lexer = get_lexer_for_filename(filename, stripall=True)
     except:
         lexer = get_lexer_for_filename("name.txt", stripall=True)
-
     formatter = HtmlFormatter(linenos=True)
     return highlight(code, lexer, formatter)

@@ -8,10 +8,9 @@ from django import urls
 from pathlib import Path
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-import pygit2
+import mpygit
 
 from mfgd_app import utils
-from mfgd_app.types import ObjectType, TreeEntry, FileChange, Commit
 from mfgd_app.models import Repository
 from mfgd_app.forms import UserForm
 
@@ -76,7 +75,7 @@ def gen_branches(repo_name, repo, oid):
             self.name = name
             self.url = url
 
-    l = list(repo.branches.local)
+    l = list(repo.heads)
     if oid not in l:
         l.append(oid)
 
@@ -86,8 +85,8 @@ def gen_branches(repo_name, repo, oid):
 def view(request, repo_name, oid, path):
     # Find the repo object in the db
     db_repo_obj = Repository.objects.get(name=repo_name)
-    # Open a pygit2 repo object to the requested repo
-    repo = pygit2.Repository(db_repo_obj.path)
+    # Open a repo object to the requested repo
+    repo = mpygit.Repository(db_repo_obj.path)
     # First we normalize the path so libgit2 doesn't choke
     path = utils.normalize_path(path)
 
@@ -97,7 +96,7 @@ def view(request, repo_name, oid, path):
         return HttpResponse("Invalid commit ID")
 
     # Resolve path inside commit
-    obj = utils.resolve_path(target.tree, path)
+    obj = utils.resolve_path(repo, target.tree, path)
     if obj == None:
         return HttpResponse("Invalid path")
 
@@ -108,11 +107,12 @@ def view(request, repo_name, oid, path):
         "branches": gen_branches(repo_name, repo, oid),
         "crumbs": gen_crumbs(repo_name, oid, path),
     }
+
     # Display correct template
-    if obj.type == ObjectType.TREE:
+    if isinstance(obj, mpygit.Tree):
         template = "tree.html"
-        context["entries"] = utils.tree_entries(repo, target, obj, path)
-    elif obj.type == ObjectType.BLOB:
+        context["entries"] = utils.tree_entries(repo, target, obj)
+    elif isinstance(obj, mpygit.Blob):
         template, code = read_blob(obj)
         if template == "blob.html":
             context["code"] = utils.highlight_code(path, code)
@@ -246,22 +246,17 @@ def info(request, repo_name, oid):
 
 def chain(request, repo_name, oid):
     db_repo_obj = Repository.objects.get(name=repo_name)
-    # Open a pygit2 repo object to the requested repo
-    repo = pygit2.Repository(db_repo_obj.path)
+    # Open a repo object to the requested repo
+    repo = mpygit.Repository(db_repo_obj.path)
 
     obj = utils.find_branch_or_commit(repo, oid)
     if obj is None:
         return HttpResponse("Invalid branch or commit ID")
-    elif isinstance(obj, pygit2.Branch):
-        commit = repo.get(pygti2.Branch.target)
-    else:
-        commit = obj
 
-    commits = [Commit(c) for c in repo.walk(commit.id)]
     context = {
         "repo_name": repo_name,
         "oid": oid,
-        "commits": commits
+        "commits": utils.walk(repo, obj.oid)
     }
     return render(request, "chain.html", context=context)
 
