@@ -71,7 +71,7 @@ class CommitStamp:
         # Parse commit stamp
         m = re.match(r"([\s\S]*) \<([\s\S]*)\> ([\s\S]*) ([\s\S]*)", val)
         # Make sure the format was correct
-        assert m != None
+        assert m is not None
         self.name, self.email, self.timestamp, self.tz = \
             m.group(1), m.group(2), int(m.group(3)), m.group(4)
 
@@ -140,54 +140,169 @@ class PackFile:
                 hash_str = binascii.hexlify(hashes[i:i+20]).decode()
                 self.entries[hash_str] = indices[i//20]
 
+    def _get_object(self, oid, obj_offs=None):
+        """Read the raw underlying data of an object"""
+        if obj_offs is None:
+            obj_offs = self.entries.get(oid, None)
+            if obj_offs is None:
+                return None
 
-    def __getitem__(self, oid):
-        """Read an ojbect from the pack file"""
-        obj_offs = self.entries.get(oid, None)
-        if obj_offs == None:
-            return None
-
-        def decode_varint(packfile):
-            """Decoder for git's custom variable length packer"""
+        def decode_obj_header(packfile):
+            """Decode the variable length object header"""
             b = packfile.read(1)[0]
             obj_type = (b & 0x70) >> 4
             obj_size = b & 0xf
+            shift = 4
             while b & 0x80:
                 b = packfile.read(1)[0]
-                obj_size <<= 7
-                obj_size |= b & 0x7f
+                obj_size |= (b & 0x7f) << shift
+                shift += 7
             return obj_type, obj_size
 
-        def decompress_stream(stream, defl_size):
+        def decompress_stream(stream):
             """Decompress zlib data from a stream without knowing the
             compressed size of said data
             """
             CHUNK_SIZE = 1024
             deflator = zlib.decompressobj()
             defl_data = b""
-            while len(defl_data) < defl_size:
+            while True:
                 chunk = stream.read(CHUNK_SIZE)
-                if chunk == None:
+                if chunk is None:
                     break
-                defl_data += deflator.decompress(chunk)
-                defl_data += deflator.flush()
+
+                # This is ugly, but as soon as we hit invalid data we break,
+                # this is the only way to decompress data without knowing its
+                # length using python's zlib library
+                try:
+                    defl_data += deflator.decompress(chunk)
+                    defl_data += deflator.flush()
+                except:
+                    break
             return defl_data
+
+        def apply_delta(base_data, delta_data):
+            """Apply a delta to the provided base data
+            """
+
+            # Current index into the delta buffer
+            idx = 0
+
+            def decode_varint():
+                """Decode a variable length integer
+                """
+                nonlocal delta_data
+                nonlocal idx
+                num = 0
+                shift = 0
+                while True:
+                    b = delta_data[idx]
+                    idx += 1
+                    num |= (b & 0x7f) << shift
+                    shift += 7
+                    if (b & 0x80) == 0:
+                        break
+                return num
+
+
+            # Read base length and verify it
+            base_len = decode_varint()
+            assert base_len == len(base_data)
+
+            # Read expected result length
+            result_len = decode_varint()
+
+            def decode_copy_delta(mask):
+                """Decode a copy delta operand based on the provided mask
+                """
+                nonlocal delta_data
+                nonlocal idx
+                bit = 1
+                num = 0
+                shift = 0
+                while bit <= mask:
+                    if (mask & bit) != 0:
+                        num |= delta_data[idx] << shift
+                        idx += 1
+                    shift += 8
+                    bit <<= 1
+                return num
+
+            result = b""
+            while idx < len(delta_data):
+                # Read opcode
+                op = delta_data[idx]
+                idx += 1
+                if op & 0x80 != 0:
+                    # Copy from base object
+                    offs = decode_copy_delta(op & 0xf)
+                    size = decode_copy_delta((op & 0x70) >> 4)
+                    result += base_data[offs:offs+size]
+                else:
+                    # Add from delta data
+                    result += delta_data[idx:idx+op]
+                    idx += op
+
+            # Verify result length, than return result
+            assert result_len == len(result)
+            return result
 
         with self.packpath.open("rb") as packfile:
             packfile.seek(obj_offs)
-            obj_type, obj_size = decode_varint(packfile)
+            obj_type, obj_size = decode_obj_header(packfile)
 
-            assert 0 < obj_type < 5 # TODO: add de-deltifier
-
-            obj_data = decompress_stream(packfile, obj_size)
-            if obj_type == 1:
-                return Commit(oid, obj_data)
-            elif obj_type == 2:
-                return Tree(oid, obj_data)
-            elif obj_type == 3:
-                return Blob(oid, obj_data)
+            # De-deltify object if needed
+            if obj_type == 6:
+                # Read negative object offset
+                # NOTE: this is encoded in a completely unspecified way, that
+                # all blogposts get wrong, and the git documentation doesn't
+                # mention at all, the real decoding algorithm can be found in
+                # "builtin/index-pack.c" in the git source tree
+                b = packfile.read(1)[0]
+                offset = b & 0x7f
+                while (b & 0x80) != 0:
+                    offset += 1
+                    b = packfile.read(1)[0]
+                    offset <<= 7
+                    offset |= b & 0x7f;
+                # Read base object
+                base_type, base_data = \
+                    self._get_object(None, obj_offs=obj_offs-offset)
+                # Apply deltas
+                obj_type = base_type
+                delta_data = decompress_stream(packfile)
+                assert obj_size == len(delta_data)
+                obj_data = apply_delta(base_data, delta_data)
+            elif obj_type == 7:
+                # Read base object
+                base_oid = binascii.hexlify(packfile.read(20)).decode()
+                base_type, base_data = self._get_object(base_oid)
+                # Apply deltas
+                obj_type = base_type
+                delta_data = decompress_stream(packfile)
+                assert obj_size == len(delta_data)
+                obj_data = apply_delta(base_data, delta_data)
             else:
-                print("fail")
+                # Just simple compressed data
+                obj_data = decompress_stream(packfile)
+                assert obj_size == len(obj_data)
+            return obj_type, obj_data
+
+    def __getitem__(self, oid):
+        """Read an object from the pack file"""
+        obj = self._get_object(oid)
+        if obj is None:
+            return None
+        obj_type, obj_data = obj
+
+        if obj_type == 1:
+            return Commit(oid, obj_data)
+        elif obj_type == 2:
+            return Tree(oid, obj_data)
+        elif obj_type == 3:
+            return Blob(oid, obj_data)
+
+        return None
 
 class Repository:
     def __init__(self, path):
@@ -217,8 +332,9 @@ class Repository:
             return
 
         for line in packed_refs_path.read_text().split("\n"):
-            # Skip empty lines and comments
-            if line == "" or line[0] == "#":
+            # Skip empty lines and comments, and peel lines (we don't care
+            # about tags for now)
+            if line == "" or line[0] == "#" or line[0] == "^":
                 continue
 
             # Add packed reference if desired
@@ -254,7 +370,7 @@ class Repository:
         sym_ref = (self.path / "HEAD").read_text()
 
         m = re.match(r"ref:\s*(\S*)", sym_ref)
-        if m != None:
+        if m is not None:
             return m.group(1)
         else:
             return sym_ref
@@ -269,7 +385,7 @@ class Repository:
             # Look for object in packs
             for pack in self.packs:
                 obj = pack[oid]
-                if obj != None:
+                if obj is not None:
                     return obj
         else:
             # Found object on disk
