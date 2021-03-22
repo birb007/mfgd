@@ -136,9 +136,20 @@ class PackFile:
             idxfile.read(entry_cnt * 4) # skip CRCs
             indices = struct.unpack(f">{entry_cnt}I", idxfile.read(entry_cnt * 4))
             self.entries = {}
+            bigentries = {}
             for i in range(0, len(hashes), 20):
                 hash_str = binascii.hexlify(hashes[i:i+20]).decode()
-                self.entries[hash_str] = indices[i//20]
+                index = indices[i//20]
+                if index <= 0x7fffffff:
+                    self.entries[hash_str] = index
+                else:
+                    bigentries[hash_str] = index & 0x7fffffff
+            # Resolve bigentries
+            big_indices = struct.unpack(f">{len(bigentries)}Q",
+                                        idxfile.read(len(bigentries) * 8))
+            for hash_str, idx in bigentries.items():
+                self.entries[hash_str] = big_indices[idx]
+
 
     def _get_object(self, oid, obj_offs=None):
         """Read the raw underlying data of an object"""
@@ -237,9 +248,19 @@ class PackFile:
                     # Copy from base object
                     offs = decode_copy_delta(op & 0xf)
                     size = decode_copy_delta((op & 0x70) >> 4)
+                    assert offs < len(base_data)
+                    assert offs+size <= len(base_data)
+                    if size == 0:
+                        # NOTE: this is a "lovely" undocumented special case I
+                        # found out about after banging my head into the table
+                        # for 5 hours, than finally deciding to read the sources
+                        size = 0x10000;
                     result += base_data[offs:offs+size]
                 else:
                     # Add from delta data
+                    assert op != 0
+                    assert idx < len(delta_data)
+                    assert idx+op <= len(delta_data)
                     result += delta_data[idx:idx+op]
                     idx += op
 
@@ -264,7 +285,7 @@ class PackFile:
                     offset += 1
                     b = packfile.read(1)[0]
                     offset <<= 7
-                    offset |= b & 0x7f;
+                    offset |= b & 0x7f
                 # Read base object
                 base_type, base_data = \
                     self._get_object(None, obj_offs=obj_offs-offset)
@@ -286,6 +307,7 @@ class PackFile:
                 # Just simple compressed data
                 obj_data = decompress_stream(packfile)
                 assert obj_size == len(obj_data)
+
             return obj_type, obj_data
 
     def __getitem__(self, oid):
