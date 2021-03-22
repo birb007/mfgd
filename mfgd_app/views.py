@@ -42,11 +42,11 @@ def read_blob(blob):
     content = blob.data
     if blob.is_binary:
         if blob.size > MAX_BLOB_SIZE:
-            return "blob_binary.html", ""
+            return "blob_binary.html", None
         return "blob_binary.html", utils.hex_dump(content)
     else:
         if blob.size > MAX_BLOB_SIZE:
-            return "blob.html", ""
+            return "blob.html", None
     return "blob.html", content.decode()
 
 

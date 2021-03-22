@@ -142,6 +142,9 @@ def get_patch(repo, new=None, old=None):
     return old.diff(new)
 
 def highlight_code(filename, code):
+    if code is None:
+        return None
+
     try:
         lexer = get_lexer_for_filename(filename, stripall=True)
     except:
