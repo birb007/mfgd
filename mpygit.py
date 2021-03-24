@@ -64,7 +64,7 @@ class Tree:
         return iter(self._entries.values())
 
     def __repr__(self):
-        return f"Tree{repr(self.entries.values())}"
+        return f"Tree{repr(self._entries.values())}"
 
 class CommitStamp:
     def __init__(self, val):
@@ -130,31 +130,71 @@ class PackFile:
             assert idxfile.read(4) == b"\x00\x00\x00\x02"
             # Read fan-out table
             self.fanout = struct.unpack(">256I", idxfile.read(256 * 4))
-            # Read entries
-            entry_cnt = self.fanout[-1]
-            hashes = idxfile.read(entry_cnt * 20)
-            idxfile.read(entry_cnt * 4) # skip CRCs
-            indices = struct.unpack(f">{entry_cnt}I", idxfile.read(entry_cnt * 4))
-            self.entries = {}
-            bigentries = {}
-            for i in range(0, len(hashes), 20):
-                hash_str = binascii.hexlify(hashes[i:i+20]).decode()
-                index = indices[i//20]
-                if index <= 0x7fffffff:
-                    self.entries[hash_str] = index
-                else:
-                    bigentries[hash_str] = index & 0x7fffffff
-            # Resolve bigentries
-            big_indices = struct.unpack(f">{len(bigentries)}Q",
-                                        idxfile.read(len(bigentries) * 8))
-            for hash_str, idx in bigentries.items():
-                self.entries[hash_str] = big_indices[idx]
 
+    def _get_offset(self, oid):
+        """Resolve an object ID into an offset into the file"""
+        oid_bytes = binascii.unhexlify(oid)
+
+        # Find previous fanout entry
+        prev_cnt = self.fanout[oid_bytes[0] - 1] if oid_bytes[0] > 0 else 0
+        # Count of hashes starting with our first byte
+        cnt = self.fanout[oid_bytes[0]] - prev_cnt
+        if cnt == 0:
+            return None
+
+        # Binary search the index file for our hash
+        def hash_offs(idx):
+            return 1032 + (prev_cnt + idx) * 20
+
+        def entry_off(idx):
+            return 1032 + self.fanout[-1] * 24 + (prev_cnt + idx) * 4
+
+        def bigentry_off(idx):
+            return 1032 + self.fanout[-1] * 28 + idx * 8
+
+        def compare_hash(h1, h2):
+            idx = 0
+            while idx < 20 and h1[idx] == h2[idx]:
+                idx += 1
+            if idx == 20:
+                return 0
+            if h1[idx] < h2[idx]:
+                return -1
+            else:
+                return 1
+
+        def bsearch_hash(file):
+            left = 0
+            right = cnt - 1
+            while left <= right:
+                mid = (left + right) // 2
+                idxfile.seek(hash_offs(mid))
+                cur_hash = idxfile.read(20)
+                result = compare_hash(cur_hash, oid_bytes)
+                if result < 0:
+                    left = mid + 1
+                elif result > 0:
+                    right = mid - 1
+                else:
+                    return mid
+            return None
+
+        with self.idxpath.open("rb") as idxfile:
+            entry_idx = bsearch_hash(idxfile)
+            if entry_idx is None:
+                return None
+            idxfile.seek(entry_off(entry_idx))
+            off, = struct.unpack(">I", idxfile.read(4))
+            if off > 0x7fffffff:
+                idxfile.seek(bigentry_off(off & 0x7fffffff))
+                off, = struct.unpack(">Q", idxfile.read(8))
+
+        return off
 
     def _get_object(self, oid, obj_offs=None):
         """Read the raw underlying data of an object"""
         if obj_offs is None:
-            obj_offs = self.entries.get(oid, None)
+            obj_offs = self._get_offset(oid)
             if obj_offs is None:
                 return None
 
