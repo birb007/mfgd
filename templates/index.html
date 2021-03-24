@@ -15,7 +15,7 @@ Dashboard
     {% for repo in repositories %}
     <tr>
         <td><a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a></td>
-        <td>{{ repo.description }}</td>
+        <td>{{ repo.description|truncatechars:50 }}</td>
         <td>{{ repo.default_branch }}</td>
     </tr>
     {% endfor %}

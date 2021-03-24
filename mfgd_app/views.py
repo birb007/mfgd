@@ -28,9 +28,6 @@ def index(request):
     for i, db_repo_obj in enumerate(repo_list):
         # We need to stick the default branch name to each repo here
         repo_list[i].default_branch = default_branch(db_repo_obj)
-        # Only select the first 30 chacters in case of overflow
-        repo_list[i].description = repo_list[i].description[0:30]
-    # Load the repos data here
     context_dict["repositories"] = repo_list
     return render(request, "index.html", context_dict)
 
