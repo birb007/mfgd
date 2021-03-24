@@ -110,6 +110,9 @@ class Commit:
     def short_oid(self):
         return self.oid[:8]
 
+    def __eq__(self, other):
+        return self.oid == other.oid
+
     def __lt__(self, other):
         return self.committer.timestamp < other.committer.timestamp
 

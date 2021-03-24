@@ -43,15 +43,18 @@ def resolve_path(repo, oid, path):
 
     return tree
 
-def walk(repo, oid):
-    """Return all commits in the history starting from oid
+def walk(repo, oid, max_results=100):
+    """Return max_result commits in the history starting from oid
     """
-    history = set() # we use a set to avoid duplicate commits from merges
+    history = []
     parents = [ oid ]
 
-    while len(parents) > 0:
+    while len(parents) > 0 and len(history) <= max_results:
         cur = repo[parents.pop(0)]
-        history.add(cur)
+        if cur in history:
+            # Avoid duplicates by ignoring commits already added
+            continue
+        history.append(cur)
         parents += cur.parents
 
     return sorted(history, reverse=True)
