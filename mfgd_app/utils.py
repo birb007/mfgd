@@ -48,25 +48,34 @@ def diff_commits(repo, commit1, commit2):
     diffs = []
 
     def added_blob(path, blob):
-        patch = "".join(difflib.unified_diff(
-            [ ],
-            blob.text.splitlines(keepends=True),
-            "/dev/null", "/".join(["b"] + path)))
-        diffs.append(("/".join(path), patch, "A"))
+        if blob.is_binary:
+            diffs.append(("/".join(path), "Binary file added", "A"))
+        else:
+            patch = "".join(difflib.unified_diff(
+                [ ],
+                blob.text.splitlines(keepends=True),
+                "/dev/null", "/".join(["b"] + path)))
+            diffs.append(("/".join(path), patch, "A"))
 
     def modified_blob(path, blob1, blob2):
-        patch = "".join(difflib.unified_diff(
-            blob1.text.splitlines(keepends=True),
-            blob2.text.splitlines(keepends=True),
-            "/".join(["a"] + path), "/".join(["b"] + path)))
-        diffs.append(("/".join(path), patch, "M"))
+        if blob1.is_binary or blob2.is_binary:
+            diffs.append(("/".join(path), "Binary file modified", "M"))
+        else:
+            patch = "".join(difflib.unified_diff(
+                blob1.text.splitlines(keepends=True),
+                blob2.text.splitlines(keepends=True),
+                "/".join(["a"] + path), "/".join(["b"] + path)))
+            diffs.append(("/".join(path), patch, "M"))
 
     def deleted_blob(path, blob):
-        patch = "".join(difflib.unified_diff(
-            blob.text.splitlines(keepends=True),
-            [ ],
-            "/".join(["a"] + path), "/dev/null"))
-        diffs.append(("/".join(path), patch, "D"))
+        if blob.is_binary:
+            diffs.append(("/".join(path), "Binary file deleted", "D"))
+        else:
+            patch = "".join(difflib.unified_diff(
+                blob.text.splitlines(keepends=True),
+                [ ],
+                "/".join(["a"] + path), "/dev/null"))
+            diffs.append(("/".join(path), patch, "D"))
 
     def added_subtree(path, tree):
         for entry in tree:
