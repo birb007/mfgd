@@ -7,3 +7,8 @@ register = template.Library()
 def fmt_date(unix_time):
     timestamp = datetime.utcfromtimestamp(unix_time)
     return { "date" : timestamp.strftime("%Y-%m-%d") }
+
+@register.inclusion_tag("date.html")
+def fmt_datetime(unix_time):
+    timestamp = datetime.utcfromtimestamp(unix_time)
+    return { "date" : timestamp.strftime("%Y-%m-%d %H:%M") }

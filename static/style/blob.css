@@ -10,10 +10,10 @@
     border-radius: 3px;
 }
 
-.blob_code * {
-    font-family: monospace;
+.blob_code {
+    overflow: scroll;
 }
 
-.line-no {
-    user-select: none;
+.blob_code * {
+    font-family: monospace;
 }

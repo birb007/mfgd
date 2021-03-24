@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load fmt_date %}
 
 {% block title_block %}
 Commit info - {{ oid }}
@@ -16,14 +17,18 @@ Commit info - {{ oid }}
     <table class="commit_info">
         <tr>
             <td>From:</td>
-            <td>{{ author.name }} &lt;{{ author.email}}&gt;</td>
+            <td>{{ commit.committer.name }} &lt;{{ commit.committer.email }}&gt;</td>
         </tr>
         <tr>
             <td>Date:</td>
-            <td>{{ commit_timestamp }}</td>
+            <td>
+                {% fmt_datetime commit.committer.timestamp %}
+            </td>
         </tr>
         <tr>
-            <td class="commit_msg" colspan="2">{{ message }}</td>
+            <td class="commit_msg" colspan="2">
+                <pre>{{ commit.message }}</pre>
+            </td>
         </tr>
     </table>
     <a class="commit_inspect" href="{% url 'view' repo_name oid '' %}">Inspect Tree</a>
@@ -51,7 +56,7 @@ Commit info - {{ oid }}
         {% else %}
         <span class="commit_path">{{ change.path }}</span>
         {% endif %}
-        <pre class="diff commit_text">{{ change.patch|safe }}</pre>
+        <span class="commit_code">{{ change.patch|safe }}</span>
     </div>
     {% endif %}
 {% endfor %}

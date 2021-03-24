@@ -48,11 +48,10 @@
     display: block;
 }
 
-.commit_text {
+.commit_code {
     display: inline-block;
 }
 
-.commit_text,
-.commit_text * {
+.commit_code * {
     font-family: monospace;
 }
