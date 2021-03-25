@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load fmt_msg %}
 
 {% block title_block %}
 Binary - {{ path }}
@@ -16,7 +17,7 @@ Binary - {{ path }}
 
 <table class="blob_box">
     <tr>
-        <td>{{ change_subject }}
+        <td>{{ change.message|subject }}
             [<a href="{% url 'info' repo_name change.oid %}">{{ change.short_oid }}</a>]
         </td>
     </tr>

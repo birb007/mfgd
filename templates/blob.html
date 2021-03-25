@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load fmt_date %}
+{% load fmt_msg %}
 
 {% block title_block %}
 File - {{ path }}
@@ -17,12 +19,15 @@ File - {{ path }}
 
 <table class="blob_box">
     <tr>
-        <td>{{ change_subject }}
+        <td>{{ change.message|subject }}
             [<a href="{% url 'info' repo_name change.oid %}">{{ change.short_oid }}</a>]
         </td>
     </tr>
     <tr>
         <td>{{ change.committer.name }} &lt;{{ change.committer.email }}&gt;</td>
+    </tr>
+    <tr>
+        <td>{% fmt_datetime change.committer.timestamp %}</td>
     </tr>
 </table>
 

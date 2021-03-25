@@ -108,7 +108,7 @@ def view(request, repo_name, oid, path):
     # Display correct template
     if isinstance(obj, mpygit.Tree):
         template = "tree.html"
-        context["entries"] = utils.tree_entries(repo, commit, obj)
+        context["entries"] = utils.tree_entries(repo, commit, path, obj)
     elif isinstance(obj, mpygit.Blob):
         template, code = read_blob(obj)
         if template == "blob.html":
@@ -117,7 +117,6 @@ def view(request, repo_name, oid, path):
             context["code"] = code
         commit = utils.get_file_history(repo, commit, path)
         context["change"] = commit
-        context["change_subject"] = commit.message.split("\n")[0]
     else:
         return HttpResponse("Unsupported object type")
 

@@ -143,23 +143,40 @@ def walk(repo, oid, max_results=100):
 
     return sorted(history, reverse=True)
 
+def collect_path_oids(repo, tree_id, path):
+    path_oids = [ ]
+    for path_entry in split_path(path):
+        tree_entry = repo[tree_id][path_entry]
+        assert tree_entry is not None
+        path_oids.append((tree_entry.name, tree_entry.oid))
+        tree_id = tree_entry.oid
+    return path_oids
 
-def get_file_history(repo, commit, path):
+def match_oids(repo, tree_id, path_oids):
+    for name, oid in path_oids:
+        tree = repo[tree_id]
+        ent = tree[name]
+        if ent is None:
+            return False
+        if ent.oid == oid:
+            return True
+        tree_id = ent.oid
+    return False
+
+def get_file_history(repo, commit, path, max_dist=100):
+    """Get the latest commit that changed the specified path"""
+    base_oids = collect_path_oids(repo, commit.tree, path)
+
+    i = 0
+    while i < max_dist:
+        if len(commit.parents) == 0:
+            return commit
+        parent = commit.parents[0]
+        if not match_oids(repo, repo[parent].tree, base_oids):
+            return commit
+        commit = repo[parent]
+        i += 1
     return commit
-    path = path.lstrip("/")
-
-    if isinstance(commit, pygit2.Commit):
-        commit = commit.id
-    parent = commit
-
-    for commit in repo.walk(commit):
-        diff = repo.diff(commit, parent)
-        for delta in diff.deltas:
-            if delta.new_file.path == path:
-                return parent
-        parent = commit
-    return None
-
 
 def find_branch_or_commit(repo, oid):
     try:
@@ -203,10 +220,10 @@ def hex_dump(binary):
     return rows
 
 
-def tree_entries(repo, target, tree):
+def tree_entries(repo, target, path, tree):
     clean_entries = []
     for entry in tree:
-        entry.last_change = target
+        entry.last_change = get_file_history(repo, target, path + "/" + entry.name)
         if not entry.isdir() and not entry.issubmod():
             blob = repo[entry.oid]
             entry.is_binary = blob.is_binary
