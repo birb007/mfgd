@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title_block %}
+Profile
+{% endblock %}
+
+{% block head_block %}
+<link rel="stylesheet" href="{% static 'style/profile.css' %}" />
+{% endblock %}
+
+{% block body_block %}
+<h1 class="profile_heading">User Profile</h1>
+<div class="profile_body">
+    <div class="container">
+        <img class="profile_img" src="{{ user.userprofile.image.url }}">
+        <h2 >{{ user.username }}</h2>
+        <p>{{ user.email }}</p> 
+    </div>
+    <form method="POST" action="{% url 'profile' %}" id="form1" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table class="table">
+            {{ u_form.as_table }}
+            {{ p_form.as_table }}
+        </table>
+        <button class="button" type="submit" form="form1" name="change_profile">Update Profile</button>
+    </form>
+    <form method="POST" action="{% url 'profile' %}" id="form2">
+        {% csrf_token %}
+        <table> 
+            {{ pw_form }}
+        </table>
+    </form>
+    <button class="button" type="submit" form="form2" name="change_password">Update Password</button>
+</div>
+
+{% endblock %}

@@ -101,6 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_PROFULE_MODULE = "mfgd.UserProfile"
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -123,5 +124,9 @@ SILENCED_SYSTEM_CHECKS = ["staticfiles.E002"]
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_ROOT = BASE_DIR / "static"
+
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "/media/"
+
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "/static/"

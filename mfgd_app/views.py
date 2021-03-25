@@ -16,7 +16,7 @@ from mpygit import mpygit, gitutil
 from mfgd_app import utils
 from mfgd_app.utils import verify_user_permissions, Permission
 from mfgd_app.models import Repository, CanAccess, UserProfile
-from mfgd_app.forms import UserForm, RepoForm
+from mfgd_app.forms import UserForm, RepoForm, UserUpdateForm, ProfileUpdateForm, PasswordForm
 
 
 def default_branch(db_repo_obj):
@@ -184,10 +184,6 @@ def user_register(request):
             user = user_form.save()
             user.set_password(user.password)
             user.save()
-            # create user profile
-            user_profile = UserProfile(user=user)
-            user_profile.save()
-            login(request, user)
             return redirect("index")
     else:
         user_form = UserForm()
@@ -203,6 +199,41 @@ def user_register(request):
 def user_logout(request):
     logout(request)
     return redirect(request.META.get('HTTP_REFERER'))
+
+@login_required
+def user_profile(request):
+
+    if request.method == 'POST' and 'change_profile' in request.POST:
+        u_form = UserUpdateForm(request.POST, instance=request.user)
+        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.userprofile)
+
+        if u_form.is_valid() and p_form.is_valid():
+            u_form.save()
+            p_form.save()
+            return redirect("profile")
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=request.user.userprofile)
+        pw_form = PasswordForm(request.user)
+
+    if request.method == 'POST' and 'change_password' in request.POST:
+         pw_form = PasswordForm(request.user, request.POST)
+         if pw_form.is_valid():
+                user = pw_form.save()
+                update_session_auth_hash(request, user)
+                return redirect("index")
+    else:
+        u_form = UserUpdateForm(instance=request.user)
+        p_form = ProfileUpdateForm(instance=request.user.userprofile)
+        pw_form = PasswordForm(request.user)
+
+    context = {
+        'u_form':u_form,
+        'p_form':p_form,
+        'pw_form':pw_form,
+        }
+
+    return render(request, 'profile.html', context)
 
 
 @verify_user_permissions
@@ -423,6 +454,7 @@ def add_repo_form(request):
             canaccess.canManage = True
             canaccess.save()
     return redirect("manage")
+
 
 def error_404(request, exception):
     return render(request, "404.html", {})

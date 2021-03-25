@@ -18,6 +18,8 @@ from mfgd_app import views
 from django.contrib import admin
 from django.urls import path, re_path
 from django.conf.urls import handler404
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 urlpatterns = [
@@ -34,11 +36,12 @@ urlpatterns = [
     path("logout/", views.user_logout, name="logout"),
     path("login/", views.user_login, name="login"),
     path("register/", views.user_register, name="register"),
+    path('profile/', views.user_profile, name='profile'),
     path("manage/", views.manage, name="manage"),
     path("manage/delete_repo/<str:repo_name>/", views.delete_repo, name="delete_repo"),
     path("add_repo/", views.add_repo, name="add_repo"),
     path("add_repo_form/", views.add_repo_form, name="add_repo_form")
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 handler404 = views.error_404
 handler500 = views.error_500
