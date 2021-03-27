@@ -14,11 +14,9 @@ Dashboard
     </tr>
     {% for repo in repositories %}
     <tr>
-        {% if user.is_authenticated and repo.user == user %}
-            <td><a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a></td>
-            <td>{{ repo.description|truncatechars:50 }}</td>
-            <td>{{ repo.default_branch }}</td>
-        {% endif %}
+        <td><a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a></td>
+        <td>{{ repo.description|truncatechars:50 }}</td>
+        <td>{{ repo.default_branch }}</td>
     </tr>
     {% endfor %}
 </table>

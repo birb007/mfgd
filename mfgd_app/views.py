@@ -1,8 +1,8 @@
 import binascii
 import re
 
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.http import HttpResponse, Http404
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django import urls
 from pathlib import Path
@@ -11,7 +11,8 @@ from django.contrib.auth.decorators import login_required
 import mpygit
 
 from mfgd_app import utils
-from mfgd_app.models import Repository, CanAccess
+from mfgd_app.utils import verify_user_permissions, Permission
+from mfgd_app.models import Repository, CanAccess, UserProfile
 from mfgd_app.forms import UserForm
 
 
@@ -24,13 +25,19 @@ def default_branch(db_repo_obj):
 
 def index(request):
     context_dict = {}
-    repo_list = Repository.objects.all()
-    can_access = CanAccess.objects.all()
-    for i, db_repo_obj in enumerate(repo_list):
-        # We need to stick the default branch name to each repo here
-        repo_list[i].default_branch = default_branch(db_repo_obj)
-    context_dict["repositories"] = repo_list
-    context_dict["canaccess"] = can_access
+    accessible_repos = Repository.objects.filter(isPublic=True)
+    if not request.user.is_anonymous:
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+            restricted_repos = Repository.objects.all().filter(canaccess__user__pk=profile.id)
+            accessible_repos = accessible_repos.union(restricted_repos)
+        except UserProfile.DoesNotExist:
+            pass
+
+    for repo in accessible_repos:
+        repo.default_branch = default_branch(repo)
+
+    context_dict["repositories"] = accessible_repos
     return render(request, "index.html", context_dict)
 
 
@@ -81,11 +88,14 @@ def gen_branches(repo_name, repo, oid):
     return [Branch(name, f"/{repo_name}/view/" + name) for name in l]
 
 
-def view(request, repo_name, oid, path):
-    # Find the repo object in the db
-    db_repo_obj = Repository.objects.get(name=repo_name)
-    # Open a repo object to the requested repo
+@verify_user_permissions
+def view(request, permission, repo_name, oid, path):
+    if permission == permission.NO_ACCESS:
+        raise Http404("no matching repository")
+
+    db_repo_obj = get_object_or_404(Repository, name=repo_name)
     repo = mpygit.Repository(db_repo_obj.path)
+
     # First we normalize the path so libgit2 doesn't choke
     path = utils.normalize_path(path)
 
@@ -162,6 +172,9 @@ def user_register(request):
             user.set_password(user.password)
             user.save()
 
+            user_profile = UserProfile(user=user)
+            user_profile.save()
+
             registered = True
 
         else:
@@ -178,7 +191,8 @@ def user_logout(request):
     return redirect("index")
 
 
-def info(request, repo_name, oid):
+@verify_user_permissions
+def info(request, permission, repo_name, oid):
     class FileChange:
         def __init__(self, path, patch, status):
             self.path = path
@@ -192,7 +206,10 @@ def info(request, repo_name, oid):
             self.insertion = f"++{insert}"
             self.deletion = f"--{delete}"
 
-    db_repo_obj = Repository.objects.get(name=repo_name)
+    if permission == permission.NO_ACCESS:
+        raise Http404("no matching repository")
+
+    db_repo_obj = get_object_or_404(Repository, name=repo_name)
     repo = mpygit.Repository(db_repo_obj.path)
 
     commit = utils.find_branch_or_commit(repo, oid)
@@ -215,8 +232,12 @@ def info(request, repo_name, oid):
     return render(request, "commit.html", context=context)
 
 
-def chain(request, repo_name, oid):
-    db_repo_obj = Repository.objects.get(name=repo_name)
+@verify_user_permissions
+def chain(request, permission, repo_name, oid):
+    if permission == permission.NO_ACCESS:
+        raise Http404("no matching repository")
+
+    db_repo_obj = get_object_or_404(Repository, name=repo_name)
     # Open a repo object to the requested repo
     repo = mpygit.Repository(db_repo_obj.path)
 

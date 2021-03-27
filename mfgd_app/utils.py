@@ -1,3 +1,4 @@
+import enum
 import binascii
 import difflib
 import re
@@ -10,6 +11,7 @@ from pygments.lexers import get_lexer_for_filename
 from pygments.formatters import HtmlFormatter
 
 from django.utils.html import escape
+from mfgd_app.models import Repository, UserProfile, CanAccess
 
 # Pre-compiled regex for speed
 split_path_re = re.compile(r"/?([^/]+)/?")
@@ -245,3 +247,45 @@ def highlight_code(filename, code):
         lexer = get_lexer_for_filename("name.txt", stripall=True)
     formatter = HtmlFormatter(linenos=True)
     return highlight(code, lexer, formatter)
+
+
+class Permission(enum.IntEnum):
+    NO_ACCESS = 0
+    CAN_VIEW = 1
+    CAN_MANAGE = 2
+
+
+def verify_user_permissions(endpoint):
+    def _inner(request, *args, **kwargs):
+        try:
+            repo_name = kwargs["repo_name"]
+        except KeyError:
+            return endpoint(request, Permission.CAN_VIEW, *args, **kwargs)
+
+        # check if repository is public or exists
+        is_public = True
+        try:
+            repo = Repository.objects.get(name=repo_name)
+            is_public = repo.isPublic
+        except Repository.DoesNotExist:
+            pass
+        if is_public:
+            return endpoint(request, Permission.CAN_VIEW, *args, **kwargs)
+
+        # user is not authenticated and repository is not public
+        if request.user.is_anonymous:
+            return endpoint(request, Permission.NO_ACCESS, *args, **kwargs)
+
+        # check if user has valid permissions
+        permission = Permission.NO_ACCESS
+        try:
+            profile = UserProfile.objects.get(user=request.user)
+            access = CanAccess.objects.get(user=profile, repo=repo)
+            if access.canManage:
+                permission = Permission.CAN_MANAGE
+            else:
+                permission = Permission.CAN_VIEW
+        except (UserProfile.DoesNotExist, CanAccess.DoesNotExist):
+            pass
+        return endpoint(request, permission, *args, **kwargs)
+    return _inner
