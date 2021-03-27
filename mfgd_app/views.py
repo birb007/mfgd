@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 import mpygit
 
 from mfgd_app import utils
-from mfgd_app.models import Repository
+from mfgd_app.models import Repository, CanAccess
 from mfgd_app.forms import UserForm
 
 
@@ -25,10 +25,12 @@ def default_branch(db_repo_obj):
 def index(request):
     context_dict = {}
     repo_list = Repository.objects.all()
+    can_access = CanAccess.objects.all()
     for i, db_repo_obj in enumerate(repo_list):
         # We need to stick the default branch name to each repo here
         repo_list[i].default_branch = default_branch(db_repo_obj)
     context_dict["repositories"] = repo_list
+    context_dict["canaccess"] = can_access
     return render(request, "index.html", context_dict)
 
 
