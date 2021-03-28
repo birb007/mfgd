@@ -367,15 +367,20 @@ def update_repo_visibility(repo, payload):
     context = {"repo_name": repo_name, "oid": oid, "commits": utils.walk(repo, obj.oid)}
     return render(request, "chain.html", context=context)
 
-
 def manage(request):
-    repos = Repository.objects.all()
-    context_dict = {}
-    context_dict["repositories"] = repos
-    return render(request, "manage.html", context=context_dict)
+    if request.user.is_superuser:
+
+        repos = Repository.objects.all()
+        context_dict = {}
+        context_dict["repositories"] = repos
+        return render(request, "manage.html", context=context_dict)
+
+    else:
+        return redirect('index')
 
 def delete_repo(request, repo_name):
-    Repository.objects.filter(name=repo_name).delete()
+    if request.user.is_superuser:
+        Repository.objects.filter(name=repo_name).delete()
     return redirect("manage")
 
 def error_404(request, exception):

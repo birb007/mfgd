@@ -269,7 +269,6 @@ class Permission(enum.IntEnum):
     CAN_VIEW = 1
     CAN_MANAGE = 2
 
-
 def verify_user_permissions(endpoint):
     def _inner(request, *args, **kwargs):
         try:
