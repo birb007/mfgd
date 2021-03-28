@@ -216,7 +216,6 @@ def info(request, permission, repo_name, oid):
     db_repo_obj = get_object_or_404(Repository, name=repo_name)
     repo = mpygit.Repository(db_repo_obj.path)
 
-    breakpoint()
     commit = utils.find_branch_or_commit(repo, oid)
     if commit is None or not isinstance(commit, mpygit.Commit):
         return HttpResponse("Invalid branch or commit ID")
