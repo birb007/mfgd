@@ -22,7 +22,7 @@ def default_branch(db_repo_obj):
     # NOTE: someone please fix this if you can, but the pygit2 API does not
     # provide access to the global HEAD as it's not a proper ref
     with open(db_repo_obj.path + "/.git/HEAD") as f:
-        return f.read().split("/")[-1]
+        return f.read().split("/")[-1].strip()
 
 
 def index(request):
@@ -92,6 +92,15 @@ def gen_branches(repo_name, repo, oid):
     return [Branch(name, f"/{repo_name}/view/" + name) for name in l]
 
 
+def view_default(request, repo_name):
+    db_repo = get_object_or_404(Repository, name=repo_name)
+    branch = default_branch(db_repo)
+    url = urls.reverse(
+        "view", kwargs={"repo_name": repo_name, "oid": branch, "path": ""}
+    )
+    return redirect(url)
+
+
 @verify_user_permissions
 def view(request, permission, repo_name, oid, path):
     if permission == permission.NO_ACCESS:
@@ -103,7 +112,6 @@ def view(request, permission, repo_name, oid, path):
     # First we normalize the path so libgit2 doesn't choke
     path = utils.normalize_path(path)
 
-    # Find commit in the repo
     commit = utils.find_branch_or_commit(repo, oid)
     if commit is None or not isinstance(commit, mpygit.Commit):
         return HttpResponse("Invalid commit ID")
@@ -122,7 +130,6 @@ def view(request, permission, repo_name, oid, path):
         "can_manage": permission == Permission.CAN_MANAGE,
     }
 
-    # Display correct template
     if isinstance(obj, mpygit.Tree):
         template = "tree.html"
         context["entries"] = utils.tree_entries(repo, commit, path, obj)
@@ -170,7 +177,6 @@ def user_register(request):
             # create user profile
             user_profile = UserProfile(user=user)
             user_profile.save()
-            # redirect to login
             login(request, user)
             return redirect("index")
     else:
@@ -210,6 +216,7 @@ def info(request, permission, repo_name, oid):
     db_repo_obj = get_object_or_404(Repository, name=repo_name)
     repo = mpygit.Repository(db_repo_obj.path)
 
+    breakpoint()
     commit = utils.find_branch_or_commit(repo, oid)
     if commit is None or not isinstance(commit, mpygit.Commit):
         return HttpResponse("Invalid branch or commit ID")
@@ -229,6 +236,13 @@ def info(request, permission, repo_name, oid):
     }
 
     return render(request, "commit.html", context=context)
+
+
+def chain_default(request, repo_name):
+    db_repo = get_object_or_404(Repository, name=repo_name)
+    branch = default_branch(db_repo)
+    url = urls.reverse("chain", kwargs={"repo_name": repo_name, "oid": branch})
+    return redirect(url)
 
 
 @verify_user_permissions
@@ -298,12 +312,11 @@ def manage_repo(request, permission, repo_name):
             UserPerm(profile.id, profile.user.username, profile.user.email, permission)
         )
 
-    # FIXME: main is an UNSAFE default branch, allow view to redirect.
     context = {
         "repo_name": repo_name,
         "users": users,
         "is_public": db_repo.isPublic,
-        "oid": "main",
+        "oid": default_branch(db_repo),
         "can_manage": True,
     }
     return render(request, "manage_repo.html", context=context)
