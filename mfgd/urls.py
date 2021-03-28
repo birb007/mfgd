@@ -34,6 +34,8 @@ urlpatterns = [
     path("logout/", views.user_logout, name="logout"),
     path("login/", views.user_login, name="login"),
     path("register/", views.user_register, name="register"),
+    path("manage/", views.manage, name="manage"),
+    path("manage/delete_repo/<str:repo_name>/", views.delete_repo, name="delete_repo"),
 ]
 
 handler404 = views.error_404

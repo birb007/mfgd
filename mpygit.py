@@ -231,6 +231,8 @@ class PackFile:
             (off,) = struct.unpack(">I", idxfile.read(4))
             if off > 0x7fffffff:
                 idxfile.seek(bigentry_off(off & 0x7fffffff))
+            if off > 0x7FFFFFFF:
+                idxfile.seek(bigentry_off(off & 0x7FFFFFFF))
                 (off,) = struct.unpack(">Q", idxfile.read(8))
 
         return off
@@ -246,11 +248,11 @@ class PackFile:
             """Decode the variable length object header"""
             b = packfile.read(1)[0]
             obj_type = (b & 0x70) >> 4
-            obj_size = b & 0xf
+            obj_size = b & 0xF
             shift = 4
             while b & 0x80:
                 b = packfile.read(1)[0]
-                obj_size |= (b & 0x7f) << shift
+                obj_size |= (b & 0x7F) << shift
                 shift += 7
             return obj_type, obj_size
 
@@ -291,7 +293,7 @@ class PackFile:
                 while True:
                     b = delta_data[idx]
                     idx += 1
-                    num |= (b & 0x7f) << shift
+                    num |= (b & 0x7F) << shift
                     shift += 7
                     if (b & 0x80) == 0:
                         break
@@ -326,7 +328,7 @@ class PackFile:
                 idx += 1
                 if op & 0x80 != 0:
                     # Copy from base object
-                    offs = decode_copy_delta(op & 0xf)
+                    offs = decode_copy_delta(op & 0xF)
                     size = decode_copy_delta((op & 0x70) >> 4)
                     assert offs < len(base_data)
                     assert offs + size <= len(base_data)
@@ -360,12 +362,12 @@ class PackFile:
                 # mention at all, the real decoding algorithm can be found in
                 # "builtin/index-pack.c" in the git source tree
                 b = packfile.read(1)[0]
-                offset = b & 0x7f
+                offset = b & 0x7F
                 while (b & 0x80) != 0:
                     offset += 1
                     b = packfile.read(1)[0]
                     offset <<= 7
-                    offset |= b & 0x7f
+                    offset |= b & 0x7F
                 # Read base object
                 base_type, base_data = self._get_object(
                     None, obj_offs=obj_offs - offset
