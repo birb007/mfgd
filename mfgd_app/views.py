@@ -141,57 +141,45 @@ def view(request, permission, repo_name, oid, path):
 
 
 def user_login(request):
+    context = {}
     if request.method == "POST":
-
-        # Get the form details and check if they match the data in the database
         username = request.POST.get("username")
         password = request.POST.get("password")
-
         user = authenticate(username=username, password=password)
-
         if user:
             if user.is_active:
                 login(request, user)
                 return redirect("index")
             else:
-                # User account is deactivated
-                return HttpResponse("Your account is disabled.")
-
+                context["error"] = "Account disabled"
         else:
-            # User account details were incorrect
-            print(f"Invalid login details: {username}, {password}")
-            return HttpResponse("Invalid login details supplied.")
-
-    else:
-        return render(request, "login.html")
+            context["error"] = "Invalid credentials"
+    return render(request, "login.html", context=context)
 
 
 def user_register(request):
     registered = False
-    # Check if form is valid, if it is, save data to database
+    errors = ""
     if request.method == "POST":
         user_form = UserForm(request.POST)
-
         if user_form.is_valid():
+            # create user account
             user = user_form.save()
             user.set_password(user.password)
             user.save()
-
+            # create user profile
             user_profile = UserProfile(user=user)
             user_profile.save()
-
-            registered = True
-
-        else:
-            print(user_form.errors)
-
+            # redirect to login
+            login(request, user)
+            return redirect("index")
     else:
         user_form = UserForm()
 
     return render(
         request,
         "register.html",
-        context={"user_form": user_form, "registered": registered},
+        context={"form": user_form, "registered": registered},
     )
 
 

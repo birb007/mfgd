@@ -50,12 +50,12 @@ function make_req(json, success, failure) {
     xhr.onloadend = function() {
         if (xhr.readyState == XMLHttpRequest.DONE) {
             if (xhr.status == 200) {
-                msg_field.innerHTML = success;
+                msg_field.innerHTML = "<strong>" + success + "</strong>";
             } else {
-                msg_field.innerHTML = failure;
+                msg_field.innerHTML = "<strong>" + failure + "</strong>";
             }
         } else {
-            msg_field.innerHTML = "request failed";
+            msg_field.innerHTML = "<strong>Request failed</strong>";
         }
     }
     xhr.open("POST", "{% url 'manage_repo' repo_name %}");
@@ -70,8 +70,8 @@ function publicize(box) {
             "action": "publicize",
             "public": box.checked
         });
-    const success = "successfully changed gobal visibility ";
-    const failure = "failed to changed global visibility";
+    const success = "Successfully changed gobal visibility ";
+    const failure = "Failed to changed global visibility";
     make_req(json, success, failure);
 }
 
@@ -91,8 +91,8 @@ function update_perm(box) {
         "manage": document.getElementById(user_id + "-management").checked
     });
 
-    const success = "successfully updated permissions for: " + name;
-    const failure = "failed to update permissions for: " + name;
+    const success = "Successfully updated permissions for user: " + name;
+    const failure = "Failed to update permissions for user: " + name;
     make_req(json, success, failure);
 }
 </script>

@@ -20,5 +20,15 @@ Register
     <div class="login_label">Password</div>
     <div class="login_control"><input type="password" name="password" size="30" /></div>
     <div class="login_submit"><input type="submit" value="Register" /></div>
+
+<div id="serv-msg">
+{% if form.errors %}
+    {% for field in form %}
+        {% for error in field.errors %}
+        <strong>{{ error|escape }}</strong>
+        {% endfor %}
+    {% endfor %}
+{% endif %}
+</div>
 </form>
 {% endblock %}
