@@ -275,8 +275,8 @@ def manage_repo(request, permission, repo_name):
             self.can_view = permission == Permission.CAN_VIEW
             self.can_manage = permission == Permission.CAN_MANAGE
 
-    #     if permission != permission.CAN_MANAGE:
-    # raise Http404("no matching repository")
+    if permission != permission.CAN_MANAGE:
+        raise Http404("no matching repository")
 
     db_repo = get_object_or_404(Repository, name=repo_name)
 
