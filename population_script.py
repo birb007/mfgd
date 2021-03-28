@@ -68,7 +68,7 @@ def create_users():
     users = {
         "birb": ("squawk", "bird@birdcage.info", True),
         "mate": ("not today", "mate@fsf.org", True),
-        "paul": ("something idk", "paul@paulbeka.com"),
+        "paul": ("something idk", "2517073B@student.gla.ac.uk", True),
         "david": ("vs software goliath", "david@slingshots.r.us"),
         "geohot": ("lol @ s0ny", "geohot@fast.ai"),
         "linus": ("i hate cpp", "linus@kernel.org", True),

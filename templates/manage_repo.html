@@ -7,11 +7,28 @@ Manage Repository
 
 {% block head_block %}
 <link rel="stylesheet" href="{% static 'style/manage_repo.css' %}" />
+<link rel="stylesheet" href="{% static 'style/login.css' %}" />
 {% endblock %}
 
 {% block body_block %}
 <h1>Manage repository</h1>
-
+<div class="login_submit">
+    <a class='button' href='delete_repo/{{ repo.name }}'><input  style="background: red;" type="button" value="Delete Repository" /></a>
+</div>
+<form method="post" action="{% url 'add_repo_form' %}">
+    {% csrf_token %}
+    <div class="login_label">Repository name</div>
+    <div class="login_control"><input type="text" id="name" cols="50" value="{{ repo_name }}" /></div>
+    <div class="login_label">Repository path</div>
+    <div class="login_control"><input type="text" id="path" cols="50" value="{{ url }}" /></div>
+    <div class="login_label">Repository description</div>
+    <div class="login_control"><textarea type="text" id="description" rows="5" cols="50">{{ desc }}</textarea></div>
+<div id="serv-msg">
+    {% if error %}
+        <strong>{{ error|escape }}</strong>
+    {% endif %}
+</div>
+</form>
 <span class="box-label">Global settings</span>
 <div id="global-settings">
     <table id="global-settings-table">
@@ -44,7 +61,7 @@ Manage Repository
         {% if user.can_view or user.can_manage %}
             checked
         {% endif %}
-        onclick="update_perm(this)"
+        onclick="update_perm(this)" 
         {% if user.isAdmin %}
             disabled
         {% endif %}
@@ -65,7 +82,10 @@ Manage Repository
 
 <div id="serv-msg"></div>
 
+<div class="login_submit"><input type="button" value="Submit" onclick="update_details()" /></div>
+
 <script>
+
 function make_req(json, success) {
     var msg_field = document.getElementById("serv-msg");
     var xhr = new XMLHttpRequest();
@@ -86,6 +106,17 @@ function make_req(json, success) {
     xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
     xhr.send(json);
 
+}
+
+function update_details() {
+    const json = JSON.stringify({
+            "action":"update_details",
+            "name" : document.getElementById("name").value,
+            "path" : document.getElementById("path").value,
+            "desc" : document.getElementById("description").value
+        });
+    const success = "Successfully changed value";
+    make_req(json, success);
 }
 
 function publicize(box) {

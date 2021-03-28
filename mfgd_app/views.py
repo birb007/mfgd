@@ -20,6 +20,7 @@ from mfgd_app.models import Repository, CanAccess, UserProfile
 from mfgd_app.forms import RegisterForm, RepoForm, UserUpdateForm, ProfileUpdateForm
 
 
+
 def default_branch(db_repo_obj):
     # NOTE: someone please fix this if you can, but the pygit2 API does not
     # provide access to the global HEAD as it"s not a proper ref
@@ -32,7 +33,8 @@ def index(request):
 
     accessible_repos = Repository.objects.filter(isPublic=True)
     if not request.user.is_anonymous:
-        if request.user.userprofile.isAdmin:
+
+        if hasattr(request.user, 'userprofile') and request.user.userprofile.isAdmin:
             accessible_repos = Repository.objects.all()
         else:
             try:
@@ -49,7 +51,6 @@ def index(request):
 
     context_dict["repositories"] = accessible_repos
     return render(request, "index.html", context_dict)
-
 
 def read_blob(blob):
     # 100K
@@ -347,6 +348,8 @@ def manage_repo(request, permission, repo_name):
                 update_profile_permissions(db_repo, request.user.userprofile, payload)
             elif action == "publicize":
                 update_repo_visibility(db_repo, payload)
+            elif action == "update_details":
+                update_details(db_repo,payload)
             else:
                 raise ValueError("invalid management action")
         except (json.decoder.JSONDecodeError, ValueError, TypeError) as e:
@@ -372,6 +375,8 @@ def manage_repo(request, permission, repo_name):
 
     context = {
         "repo_name": repo_name,
+        "desc": db_repo.description,
+        "url" : db_repo.path,
         "users": users,
         "is_public": db_repo.isPublic,
         "oid": default_branch(db_repo),
@@ -427,27 +432,30 @@ def update_repo_visibility(repo, payload):
     repo.save()
 
 
-def manage(request):
-    if request.user.is_superuser:
-        context_dict = {}
-        repos = Repository.objects.all()
-        for repo in repos:
-            repo.default_branch = default_branch(repo)
-        context_dict["repositories"] = repos
-        return render(request, "manage.html", context=context_dict)
-    else:
-        return redirect("index")
-
+def update_details(repo, payload):
+    repository = get_object_or_404(Repository, name=repo)
+    if repository.name != payload["name"]:
+        newRepo = Repository(name=payload["name"], path=payload["path"], description=payload["desc"],
+            isPublic=repository.isPublic)
+        repository.delete()
+        newRepo.save()
+    repository.path = payload["path"]
+    repository.description = payload["desc"]
+    repository.save()
 
 def delete_repo(request, repo_name):
     if request.user.is_superuser:
         Repository.objects.filter(name=repo_name).delete()
-    return redirect("manage")
+    return redirect("index")
 
+@verify_user_permissions
+def delete_repo(request, permisson, repo_name):
+    if request.user.is_superuser or permission.CAN_MANAGE:
+        get_object_or_404(Repository, name=repo_name).delete()
+    return redirect("index")
 
 def add_repo(request):
     return render(request, "add_repo.html")
-
 
 def add_repo_form(request):
     if request.method == "POST" and request.user.is_superuser:
@@ -460,7 +468,7 @@ def add_repo_form(request):
             canaccess = CanAccess(user=request.user.userprofile, repo=repo)
             canaccess.canManage = True
             canaccess.save()
-    return redirect("manage")
+    return redirect("index")
 
 def error_404(request, exception):
     return render(request, "404.html", {})

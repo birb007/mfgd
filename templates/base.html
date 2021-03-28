@@ -25,7 +25,7 @@
 			{% endif %}
             <a href="{% url 'index' %}">Dashboard</a>
             {% if user.is_superuser %}
-                <a href="{% url 'manage' %}">Manage Repositories</a>
+                <a href="{% url 'add_repo' %}">Add Repository</a>
             {% endif %}
             {% if repo_name %}
             <span>|</span>

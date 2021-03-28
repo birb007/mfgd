@@ -37,11 +37,11 @@ urlpatterns = [
     path("login/", views.user_login, name="login"),
     path("register/", views.user_register, name="register"),
     path('profile/', views.user_profile, name='profile'),
-    path("manage/", views.manage, name="manage"),
-    path("manage/delete_repo/<str:repo_name>/", views.delete_repo, name="delete_repo"),
+    path("<str:repo_name>/delete_repo/", views.delete_repo, name="delete_repo"),
     path("add_repo/", views.add_repo, name="add_repo"),
     path("add_repo_form/", views.add_repo_form, name="add_repo_form")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
 
 handler404 = views.error_404
 handler500 = views.error_500
