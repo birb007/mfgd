@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title_block %}Add Repository{% endblock %}
+
+{% block head_block %}
+<link rel="stylesheet" href="{% static 'style/login.css' %}" />
+{% endblock %}
+
+{% block body_block %}
+<h1 class="login_msg">Add a Repository</h1>
+<form method="post" action="{% url 'add_repo_form' %}">
+    {% csrf_token %}
+    <div class="login_label">Repository name</div>
+    <div class="login_control"><input type="text" name="name" cols="50" /></div>
+    <div class="login_label">Repository path</div>
+    <div class="login_control"><input type="text" name="path" cols="50" /></div>
+    <div class="login_label">Repository description</div>
+    <div class="login_control"><textarea type="text" name="description" rows="5" cols="50"></textarea></div>
+    <div class="login_control">Public: <input type="checkbox" name="isPublic" checked /></div>
+    <div class="login_submit"><input type="submit" value="Submit" /></div>
+<div id="serv-msg">
+    {% if error %}
+        <strong>{{ error|escape }}</strong>
+    {% endif %}
+</div>
+</form>
+{% endblock %}
