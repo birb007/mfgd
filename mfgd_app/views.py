@@ -15,7 +15,7 @@ import mpygit
 from mfgd_app import utils
 from mfgd_app.utils import verify_user_permissions, Permission
 from mfgd_app.models import Repository, CanAccess, UserProfile
-from mfgd_app.forms import UserForm
+from mfgd_app.forms import UserForm, RepoForm
 
 
 def default_branch(db_repo_obj):
@@ -370,9 +370,11 @@ def update_repo_visibility(repo, payload):
 def manage(request):
     if request.user.is_superuser:
 
-        repos = Repository.objects.all()
         context_dict = {}
-        context_dict["repositories"] = repos
+        repos = Repository.objects.all()
+        for repo in repos:
+            repo.default_branch = default_branch(repo)
+        context_dict['repositories'] = repos
         return render(request, "manage.html", context=context_dict)
 
     else:
@@ -381,6 +383,23 @@ def manage(request):
 def delete_repo(request, repo_name):
     if request.user.is_superuser:
         Repository.objects.filter(name=repo_name).delete()
+    return redirect("manage")
+
+def add_repo(request):
+    return render(request, "add_repo.html")
+
+def add_repo_form(request):
+    if request.method == "POST" and request.user.is_superuser:
+        repo_form = RepoForm(request.POST)
+        if repo_form.is_valid():
+            # create repo
+            Repo = repo_form.save()
+            Repo.save()
+
+            canaccess = CanAccess(user=UserProfile.objects.get(user=request.user), repo=Repo)
+            canaccess.canManage = True
+            canaccess.save()
+
     return redirect("manage")
 
 def error_404(request, exception):

@@ -13,3 +13,14 @@ class UserForm(forms.ModelForm):
             "email",
             "password",
         )
+
+class RepoForm(forms.ModelForm):
+
+	class Meta:
+		model = Repository
+		fields = (
+			"name",
+			"path",
+			"description",
+			"isPublic",
+		)
