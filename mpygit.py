@@ -29,6 +29,7 @@ import re
 import struct
 import zlib
 
+
 class Blob:
     def __init__(self, oid, data):
         self.oid = oid
@@ -40,11 +41,13 @@ class Blob:
         except:
             self.is_binary = True
 
+
 S_IFMT = 0o170000
-S_IFDIR = 0o040000 # directory
-S_IFREG = 0o100000 # regular file
-S_IFLNK = 0o120000 # symbolic link
-S_IFMOD = 0o160000 # submodule
+S_IFDIR = 0o040000  # directory
+S_IFREG = 0o100000  # regular file
+S_IFLNK = 0o120000  # symbolic link
+S_IFMOD = 0o160000  # submodule
+
 
 class TreeEntry:
     def __init__(self, name, mode, oid):
@@ -71,6 +74,7 @@ class TreeEntry:
     def __repr__(self):
         return f"({self.name} {self.mode:o} {self.oid})"
 
+
 class Tree:
     def __init__(self, oid, data):
         self.oid = oid
@@ -80,8 +84,9 @@ class Tree:
             meta, rest = data.split(b"\x00", 1)
             meta = meta.decode()
             mode, name = meta.split(" ", 1)
-            self._entries[name] = \
-                TreeEntry(name, int(mode, 8), binascii.hexlify(rest[:20]).decode())
+            self._entries[name] = TreeEntry(
+                name, int(mode, 8), binascii.hexlify(rest[:20]).decode()
+            )
             data = rest[20:]
 
     def __getitem__(self, key):
@@ -93,17 +98,23 @@ class Tree:
     def __repr__(self):
         return f"Tree{repr(self._entries.values())}"
 
+
 class CommitStamp:
     def __init__(self, val):
         # Parse commit stamp
         m = re.match(r"([\s\S]*) \<([\s\S]*)\> ([\s\S]*) ([\s\S]*)", val)
         # Make sure the format was correct
         assert m is not None
-        self.name, self.email, self.timestamp, self.tz = \
-            m.group(1), m.group(2), int(m.group(3)), m.group(4)
+        self.name, self.email, self.timestamp, self.tz = (
+            m.group(1),
+            m.group(2),
+            int(m.group(3)),
+            m.group(4),
+        )
 
     def __repr__(self):
         return f"{self.name} <{self.email}>"
+
 
 class Commit:
     def __init__(self, oid, data):
@@ -120,7 +131,7 @@ class Commit:
         # Parse metadata
         for i, line in enumerate(lines):
             if line == "":
-                self.message = "\n".join(lines[i+1:])
+                self.message = "\n".join(lines[i + 1 :])
                 break
 
             key, val = line.split(" ", 1)
@@ -147,6 +158,7 @@ class Commit:
 
     def __repr__(self):
         return f"{self.author} {self.message}"
+
 
 class PackFile:
     def __init__(self, idxpath, packpath):
@@ -216,10 +228,10 @@ class PackFile:
             if entry_idx is None:
                 return None
             idxfile.seek(entry_off(entry_idx))
-            off, = struct.unpack(">I", idxfile.read(4))
+            (off,) = struct.unpack(">I", idxfile.read(4))
             if off > 0x7fffffff:
                 idxfile.seek(bigentry_off(off & 0x7fffffff))
-                off, = struct.unpack(">Q", idxfile.read(8))
+                (off,) = struct.unpack(">Q", idxfile.read(8))
 
         return off
 
@@ -265,15 +277,13 @@ class PackFile:
             return defl_data
 
         def apply_delta(base_data, delta_data):
-            """Apply a delta to the provided base data
-            """
+            """Apply a delta to the provided base data"""
 
             # Current index into the delta buffer
             idx = 0
 
             def decode_varint():
-                """Decode a variable length integer
-                """
+                """Decode a variable length integer"""
                 nonlocal delta_data
                 nonlocal idx
                 num = 0
@@ -287,7 +297,6 @@ class PackFile:
                         break
                 return num
 
-
             # Read base length and verify it
             base_len = decode_varint()
             assert base_len == len(base_data)
@@ -296,8 +305,7 @@ class PackFile:
             result_len = decode_varint()
 
             def decode_copy_delta(mask):
-                """Decode a copy delta operand based on the provided mask
-                """
+                """Decode a copy delta operand based on the provided mask"""
                 nonlocal delta_data
                 nonlocal idx
                 bit = 1
@@ -321,19 +329,19 @@ class PackFile:
                     offs = decode_copy_delta(op & 0xf)
                     size = decode_copy_delta((op & 0x70) >> 4)
                     assert offs < len(base_data)
-                    assert offs+size <= len(base_data)
+                    assert offs + size <= len(base_data)
                     if size == 0:
                         # NOTE: this is a "lovely" undocumented special case I
                         # found out about after banging my head into the table
                         # for 5 hours, than finally deciding to read the sources
-                        size = 0x10000;
-                    result += base_data[offs:offs+size]
+                        size = 0x10000
+                    result += base_data[offs : offs + size]
                 else:
                     # Add from delta data
                     assert op != 0
                     assert idx < len(delta_data)
-                    assert idx+op <= len(delta_data)
-                    result += delta_data[idx:idx+op]
+                    assert idx + op <= len(delta_data)
+                    result += delta_data[idx : idx + op]
                     idx += op
 
             # Verify result length, than return result
@@ -359,8 +367,9 @@ class PackFile:
                     offset <<= 7
                     offset |= b & 0x7f
                 # Read base object
-                base_type, base_data = \
-                    self._get_object(None, obj_offs=obj_offs-offset)
+                base_type, base_data = self._get_object(
+                    None, obj_offs=obj_offs - offset
+                )
                 # Apply deltas
                 obj_type = base_type
                 delta_data = decompress_stream(packfile)
@@ -398,6 +407,7 @@ class PackFile:
 
         return None
 
+
 class Repository:
     def __init__(self, path):
         # Save repo path
@@ -434,7 +444,7 @@ class Repository:
             # Add packed reference if desired
             val, key = line.split(" ", 1)
             if key.startswith(want):
-                realkey = key[len(want):]
+                realkey = key[len(want) :]
                 # NOTE: packed refs do *not* take precedence over unpacked ones
                 if realkey not in tgt_dict:
                     tgt_dict[realkey] = val
@@ -442,16 +452,20 @@ class Repository:
     @property
     def tags(self):
         """List of tags"""
-        tags = { ref.name : ref.read_text().strip()
-                 for ref in (self.path / "refs" / "tags").iterdir() }
+        tags = {
+            ref.name: ref.read_text().strip()
+            for ref in (self.path / "refs" / "tags").iterdir()
+        }
         self._read_packed_refs(tags, "refs/tags/")
         return tags
 
     @property
     def heads(self):
         """List of heads (aka branches)"""
-        heads = { ref.name : ref.read_text().strip()
-                 for ref in (self.path / "refs" / "heads").iterdir() }
+        heads = {
+            ref.name: ref.read_text().strip()
+            for ref in (self.path / "refs" / "heads").iterdir()
+        }
         self._read_packed_refs(heads, "refs/heads/")
         return heads
 

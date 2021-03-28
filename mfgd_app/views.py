@@ -31,7 +31,9 @@ def index(request):
     if not request.user.is_anonymous:
         try:
             profile = UserProfile.objects.get(user=request.user)
-            restricted_repos = Repository.objects.all().filter(canaccess__user__pk=profile.id)
+            restricted_repos = Repository.objects.all().filter(
+                canaccess__user__pk=profile.id
+            )
             accessible_repos = accessible_repos.union(restricted_repos)
         except UserProfile.DoesNotExist:
             pass
@@ -167,7 +169,7 @@ def user_login(request):
 def user_register(request):
     registered = False
     # Check if form is valid, if it is, save data to database
-    if request.method == 'POST':
+    if request.method == "POST":
         user_form = UserForm(request.POST)
 
         if user_form.is_valid():
@@ -186,7 +188,12 @@ def user_register(request):
     else:
         user_form = UserForm()
 
-    return render(request, 'register.html', context={'user_form': user_form, 'registered': registered})
+    return render(
+        request,
+        "register.html",
+        context={"user_form": user_form, "registered": registered},
+    )
+
 
 @login_required
 def user_logout(request):
@@ -268,12 +275,12 @@ def manage_repo(request, permission, repo_name):
             self.can_view = permission == Permission.CAN_VIEW
             self.can_manage = permission == Permission.CAN_MANAGE
 
-#     if permission != permission.CAN_MANAGE:
-        # raise Http404("no matching repository")
+    #     if permission != permission.CAN_MANAGE:
+    # raise Http404("no matching repository")
 
     db_repo = get_object_or_404(Repository, name=repo_name)
 
-    if request.method == 'POST':
+    if request.method == "POST":
         try:
             payload = json.loads(request.body)
             action = payload.get("action", None)
@@ -287,7 +294,6 @@ def manage_repo(request, permission, repo_name):
             return HttpResponse("malformed payload", status=400)
         return HttpResponse(status=200)
 
-
     users = []
     for profile in UserProfile.objects.all():
         permission = Permission.NO_ACCESS
@@ -300,11 +306,18 @@ def manage_repo(request, permission, repo_name):
         except CanAccess.DoesNotExist:
             pass
 
-        users.append(UserPerm(profile.id, profile.user.username, profile.user.email, permission))
+        users.append(
+            UserPerm(profile.id, profile.user.username, profile.user.email, permission)
+        )
 
     # FIXME: main is an UNSAFE default branch, allow view to redirect.
-    context = {"repo_name": repo_name, "users": users, "is_public": db_repo.isPublic, "oid": "main",
-            "can_manage": True}
+    context = {
+        "repo_name": repo_name,
+        "users": users,
+        "is_public": db_repo.isPublic,
+        "oid": "main",
+        "can_manage": True,
+    }
     return render(request, "manage_repo.html", context=context)
 
 
@@ -330,8 +343,9 @@ def update_profile_permissions(repo, manager, payload):
     manage = get_entry("manage", bool)
 
     if visible:
-        CanAccess.objects.update_or_create(user=profile, repo=repo,
-                defaults={"canManage": manage})
+        CanAccess.objects.update_or_create(
+            user=profile, repo=repo, defaults={"canManage": manage}
+        )
     else:
         try:
             CanAccess.objects.get(user=profile, repo=repo).delete()
@@ -347,7 +361,7 @@ def update_repo_visibility(repo, payload):
             raise TypeError
         return val
 
-    public = get_entry("public", bool);
+    public = get_entry("public", bool)
     repo.isPublic = public
     repo.save()
 

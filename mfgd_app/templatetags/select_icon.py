@@ -2,6 +2,7 @@ from django import template
 
 register = template.Library()
 
+
 @register.inclusion_tag("icon.html")
 def select_icon(entry):
     context = {}

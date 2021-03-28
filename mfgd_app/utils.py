@@ -46,6 +46,7 @@ def resolve_path(repo, oid, path):
 
     return tree
 
+
 def diff_commits(repo, commit1, commit2):
     diffs = []
 
@@ -53,35 +54,47 @@ def diff_commits(repo, commit1, commit2):
         if blob.is_binary:
             diffs.append(("/".join(path), "Binary file added", "A"))
         else:
-            patch = "".join(difflib.unified_diff(
-                [ ],
-                blob.text.splitlines(keepends=True),
-                "/dev/null", "/".join(["b"] + path)))
+            patch = "".join(
+                difflib.unified_diff(
+                    [],
+                    blob.text.splitlines(keepends=True),
+                    "/dev/null",
+                    "/".join(["b"] + path),
+                )
+            )
             diffs.append(("/".join(path), patch, "A"))
 
     def modified_blob(path, blob1, blob2):
         if blob1.is_binary or blob2.is_binary:
             diffs.append(("/".join(path), "Binary file modified", "M"))
         else:
-            patch = "".join(difflib.unified_diff(
-                blob1.text.splitlines(keepends=True),
-                blob2.text.splitlines(keepends=True),
-                "/".join(["a"] + path), "/".join(["b"] + path)))
+            patch = "".join(
+                difflib.unified_diff(
+                    blob1.text.splitlines(keepends=True),
+                    blob2.text.splitlines(keepends=True),
+                    "/".join(["a"] + path),
+                    "/".join(["b"] + path),
+                )
+            )
             diffs.append(("/".join(path), patch, "M"))
 
     def deleted_blob(path, blob):
         if blob.is_binary:
             diffs.append(("/".join(path), "Binary file deleted", "D"))
         else:
-            patch = "".join(difflib.unified_diff(
-                blob.text.splitlines(keepends=True),
-                [ ],
-                "/".join(["a"] + path), "/dev/null"))
+            patch = "".join(
+                difflib.unified_diff(
+                    blob.text.splitlines(keepends=True),
+                    [],
+                    "/".join(["a"] + path),
+                    "/dev/null",
+                )
+            )
             diffs.append(("/".join(path), patch, "D"))
 
     def added_subtree(path, tree):
         for entry in tree:
-            entry_path = path + [ entry.name ]
+            entry_path = path + [entry.name]
             if entry.isreg():
                 added_blob(entry_path, repo[entry.oid])
             elif entry.isdir():
@@ -89,16 +102,16 @@ def diff_commits(repo, commit1, commit2):
 
     def deleted_subtree(path, tree):
         for entry in tree:
-            entry_path = path + [ entry.name ]
+            entry_path = path + [entry.name]
             if entry.isreg():
                 deleted_blob(entry_path, repo[entry.oid])
             elif entry.isdir():
                 deleted_subtree(entry_path, repo[entry.oid])
 
     def diff_subtree(path, tree1, tree2):
-        for entry in tree1: # Look for deleted blobs
+        for entry in tree1:  # Look for deleted blobs
             newent = tree2[entry.name]
-            entry_path = path + [ entry.name ]
+            entry_path = path + [entry.name]
             if entry.isreg():
                 if newent is None or not newent.isreg():
                     deleted_blob(entry_path, repo[entry.oid])
@@ -106,22 +119,19 @@ def diff_commits(repo, commit1, commit2):
                 if newent is None or not newent.isdir():
                     deleted_subtree(entry_path, repo[entry.oid])
 
-        for entry in tree2: # Look for added or modified blobs
+        for entry in tree2:  # Look for added or modified blobs
             oldent = tree1[entry.name]
-            entry_path = path + [ entry.name ]
+            entry_path = path + [entry.name]
             if entry.isreg():
                 if oldent is None or not oldent.isreg():
                     added_blob(entry_path, repo[entry.oid])
                 elif entry.oid != oldent.oid:
-                    modified_blob(entry_path,
-                        repo[oldent.oid],
-                        repo[entry.oid])
+                    modified_blob(entry_path, repo[oldent.oid], repo[entry.oid])
             elif entry.isdir():
                 if oldent is None or not oldent.isdir():
                     added_subtree(entry_path, repo[entry.oid])
                 elif entry.oid != oldent.oid:
                     diff_subtree(entry_path, repo[oldent.oid], repo[entry.oid])
-
 
     if commit1 is None:
         added_subtree([], repo[commit2.tree])
@@ -129,11 +139,11 @@ def diff_commits(repo, commit1, commit2):
         diff_subtree([], repo[commit1.tree], repo[commit2.tree])
     return diffs
 
+
 def walk(repo, oid, max_results=100):
-    """Return max_result commits in the history starting from oid
-    """
+    """Return max_result commits in the history starting from oid"""
     history = []
-    parents = [ oid ]
+    parents = [oid]
 
     while len(parents) > 0 and len(history) <= max_results:
         cur = repo[parents.pop(0)]
@@ -145,14 +155,16 @@ def walk(repo, oid, max_results=100):
 
     return sorted(history, reverse=True)
 
+
 def collect_path_oids(repo, tree_id, path):
-    path_oids = [ ]
+    path_oids = []
     for path_entry in split_path(path):
         tree_entry = repo[tree_id][path_entry]
         assert tree_entry is not None
         path_oids.append((tree_entry.name, tree_entry.oid))
         tree_id = tree_entry.oid
     return path_oids
+
 
 def match_oids(repo, tree_id, path_oids):
     for name, oid in path_oids:
@@ -164,6 +176,7 @@ def match_oids(repo, tree_id, path_oids):
             return True
         tree_id = ent.oid
     return False
+
 
 def get_file_history(repo, commit, path, max_dist=100):
     """Get the latest commit that changed the specified path"""
@@ -179,6 +192,7 @@ def get_file_history(repo, commit, path, max_dist=100):
         commit = repo[parent]
         i += 1
     return commit
+
 
 def find_branch_or_commit(repo, oid):
     try:
@@ -237,6 +251,7 @@ def tree_entries(repo, target, path, tree):
     clean_entries.sort(key=lambda entry: entry.isdir(), reverse=True)
     return clean_entries
 
+
 def highlight_code(filename, code):
     if code is None:
         return None
@@ -267,7 +282,7 @@ def verify_user_permissions(endpoint):
         try:
             repo = Repository.objects.get(name=repo_name)
             permission = Permission.CAN_VIEW if repo.isPublic else Permission.NO_ACCESS
-        except Repository.DoesNotExist: # let view handle failure
+        except Repository.DoesNotExist:  # let view handle failure
             return endpoint(request, Permission.CAN_VIEW, *args, **kwargs)
 
         if request.user.is_anonymous:
@@ -283,4 +298,5 @@ def verify_user_permissions(endpoint):
         except (UserProfile.DoesNotExist, CanAccess.DoesNotExist):
             pass
         return endpoint(request, permission, *args, **kwargs)
+
     return _inner
