@@ -1,4 +1,5 @@
 import binascii
+import json
 import re
 
 from django.http import HttpResponse, Http404
@@ -8,6 +9,7 @@ from django import urls
 from pathlib import Path
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import requires_csrf_token
 import mpygit
 
 from mfgd_app import utils
@@ -115,6 +117,7 @@ def view(request, permission, repo_name, oid, path):
         "path": path,
         "branches": gen_branches(repo_name, repo, oid),
         "crumbs": gen_crumbs(repo_name, oid, path),
+        "can_manage": permission == Permission.CAN_MANAGE,
     }
 
     # Display correct template
@@ -227,6 +230,7 @@ def info(request, permission, repo_name, oid):
         "oid": oid,
         "commit": commit,
         "changes": changes,
+        "can_manage": permission == Permission.CAN_MANAGE,
     }
 
     return render(request, "commit.html", context=context)
@@ -248,9 +252,104 @@ def chain(request, permission, repo_name, oid):
     context = {
         "repo_name": repo_name,
         "oid": oid,
-        "commits": utils.walk(repo, obj.oid)
+        "commits": utils.walk(repo, obj.oid),
+        "can_manage": permission == Permission.CAN_MANAGE,
     }
     return render(request, "chain.html", context=context)
+
+
+@verify_user_permissions
+def manage_repo(request, permission, repo_name):
+    class UserPerm:
+        def __init__(self, id, name, email, permission):
+            self.id = id
+            self.name = name
+            self.email = email
+            self.can_view = permission == Permission.CAN_VIEW
+            self.can_manage = permission == Permission.CAN_MANAGE
+
+#     if permission != permission.CAN_MANAGE:
+        # raise Http404("no matching repository")
+
+    db_repo = get_object_or_404(Repository, name=repo_name)
+
+    if request.method == 'POST':
+        try:
+            payload = json.loads(request.body)
+            action = payload.get("action", None)
+            if action == "update_perm":
+                update_profile_permissions(db_repo, request.user.userprofile, payload)
+            elif action == "publicize":
+                update_repo_visibility(db_repo, payload)
+            else:
+                raise ValueError
+        except (json.decoder.JSONDecodeError, ValueError, TypeError):
+            return HttpResponse("malformed payload", status=400)
+        return HttpResponse(status=200)
+
+
+    users = []
+    for profile in UserProfile.objects.all():
+        permission = Permission.NO_ACCESS
+        try:
+            access = CanAccess.objects.get(repo=db_repo, user=profile)
+            if access.canManage:
+                permission = Permission.CAN_MANAGE
+            else:
+                permission = Permission.CAN_VIEW
+        except CanAccess.DoesNotExist:
+            pass
+
+        users.append(UserPerm(profile.id, profile.user.username, profile.user.email, permission))
+
+    # FIXME: main is an UNSAFE default branch, allow view to redirect.
+    context = {"repo_name": repo_name, "users": users, "is_public": db_repo.isPublic, "oid": "main",
+            "can_manage": True}
+    return render(request, "manage_repo.html", context=context)
+
+
+def update_profile_permissions(repo, manager, payload):
+    def get_entry(name, type):
+        # let KeyError bubble up to callsite
+        val = payload[name]
+        if not isinstance(val, type):
+            raise TypeError
+        return val
+
+    user_id = get_entry("id", str)
+    try:
+        user_id = int(user_id)
+        profile = UserProfile.objects.get(id=user_id)
+    except UserProfile.DoesNotExist:
+        raise ValueError
+
+    if manager == profile:
+        raise ValueError("cannot change own permissions")
+
+    visible = get_entry("visible", bool)
+    manage = get_entry("manage", bool)
+
+    if visible:
+        CanAccess.objects.update_or_create(user=profile, repo=repo,
+                defaults={"canManage": manage})
+    else:
+        try:
+            CanAccess.objects.get(user=profile, repo=repo).delete()
+        except CanAccess.DoesNotExist:
+            pass
+
+
+def update_repo_visibility(repo, payload):
+    def get_entry(name, type):
+        # let KeyError bubble up to callsite
+        val = payload[name]
+        if not isinstance(val, type):
+            raise TypeError
+        return val
+
+    public = get_entry("public", bool);
+    repo.isPublic = public
+    repo.save()
 
 
 def error_404(request, exception):

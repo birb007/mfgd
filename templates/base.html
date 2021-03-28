@@ -26,6 +26,9 @@
             {% if repo_name %}
             <a href="{% url 'view' repo_name oid '' %}">Tree</a>
             <a href="{% url 'chain' repo_name oid %}">Commits</a>
+                {% if can_manage %}
+                <a href="{% url 'manage_repo' repo_name %}">Manage</a>
+                {% endif %}
             {% endif %}
         </div>
 

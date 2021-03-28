@@ -27,6 +27,7 @@ urlpatterns = [
     ),
     re_path(r"(?P<repo_name>\w+)/info/(?P<oid>\w+)/?", views.info, name="info"),
     re_path(r"(?P<repo_name>\w+)/chain/(?P<oid>\w+)/?", views.chain, name="chain"),
+    re_path(r"(?P<repo_name>\w+)/manage/?", views.manage_repo, name="manage_repo"),
     path("admin/", admin.site.urls),
     path('logout/', views.user_logout, name='logout'),
     path('login/', views.user_login, name='login'),

@@ -263,24 +263,19 @@ def verify_user_permissions(endpoint):
             return endpoint(request, Permission.CAN_VIEW, *args, **kwargs)
 
         # check if repository is public or exists
-        is_public = True
+        permission = Permission.CAN_VIEW
         try:
             repo = Repository.objects.get(name=repo_name)
-            is_public = repo.isPublic
-        except Repository.DoesNotExist:
-            pass
-        if is_public:
+            permission = Permission.CAN_VIEW if repo.isPublic else Permission.NO_ACCESS
+        except Repository.DoesNotExist: # let view handle failure
             return endpoint(request, Permission.CAN_VIEW, *args, **kwargs)
 
-        # user is not authenticated and repository is not public
         if request.user.is_anonymous:
-            return endpoint(request, Permission.NO_ACCESS, *args, **kwargs)
+            return endpoint(request, permission, *args, **kwargs)
 
         # check if user has valid permissions
-        permission = Permission.NO_ACCESS
         try:
-            profile = UserProfile.objects.get(user=request.user)
-            access = CanAccess.objects.get(user=profile, repo=repo)
+            access = CanAccess.objects.get(user=request.user.userprofile, repo=repo)
             if access.canManage:
                 permission = Permission.CAN_MANAGE
             else:
