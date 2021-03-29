@@ -1,4 +1,6 @@
 *.pyc
 __pycache__
-# We won't put the production db into the repo, only the secret ;)
+# Ignore db
 db.sqlite3
+# Ignore repos
+repositories
