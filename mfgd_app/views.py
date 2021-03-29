@@ -10,7 +10,7 @@ from pathlib import Path
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import requires_csrf_token
-import mpygit
+from mpygit import mpygit, gitutil
 
 from mfgd_app import utils
 from mfgd_app.utils import verify_user_permissions, Permission
@@ -222,7 +222,7 @@ def info(request, permission, repo_name, oid):
 
     changes = []
     parent = repo[commit.parents[0]] if len(commit.parents) > 0 else None
-    diffs = utils.diff_commits(repo, parent, commit)
+    diffs = gitutil.diff_commits(repo, parent, commit)
     for path, patch, status in diffs:
         changes.append(FileChange(path, patch, status))
 

@@ -1,0 +1,3 @@
+[submodule "mpygit"]
+	path = mpygit
+	url = https://github.com/kukrimate/mpygit
