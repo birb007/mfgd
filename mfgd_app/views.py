@@ -367,9 +367,9 @@ def update_repo_visibility(repo, payload):
     context = {"repo_name": repo_name, "oid": oid, "commits": utils.walk(repo, obj.oid)}
     return render(request, "chain.html", context=context)
 
+
 def manage(request):
     if request.user.is_superuser:
-
         context_dict = {}
         repos = Repository.objects.all()
         for repo in repos:
@@ -380,26 +380,28 @@ def manage(request):
     else:
         return redirect('index')
 
+
 def delete_repo(request, repo_name):
     if request.user.is_superuser:
         Repository.objects.filter(name=repo_name).delete()
     return redirect("manage")
 
+
 def add_repo(request):
     return render(request, "add_repo.html")
+
 
 def add_repo_form(request):
     if request.method == "POST" and request.user.is_superuser:
         repo_form = RepoForm(request.POST)
         if repo_form.is_valid():
             # create repo
-            Repo = repo_form.save()
-            Repo.save()
+            repo = repo_form.save()
+            repo.save()
 
-            canaccess = CanAccess(user=UserProfile.objects.get(user=request.user), repo=Repo)
+            canaccess = CanAccess(user=request.user.userprofile, repo=repo)
             canaccess.canManage = True
             canaccess.save()
-
     return redirect("manage")
 
 def error_404(request, exception):
