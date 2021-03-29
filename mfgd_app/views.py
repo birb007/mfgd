@@ -260,7 +260,7 @@ def chain(request, permission, repo_name, oid):
     context = {
         "repo_name": repo_name,
         "oid": oid,
-        "commits": utils.walk(repo, obj.oid),
+        "commits": utils.create_walker(repo, obj.oid),
         "can_manage": permission == Permission.CAN_MANAGE,
     }
     return render(request, "chain.html", context=context)

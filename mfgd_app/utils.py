@@ -3,6 +3,7 @@ import binascii
 import difflib
 import re
 import string
+import heapq
 
 from mpygit import mpygit
 
@@ -46,20 +47,46 @@ def resolve_path(repo, oid, path):
 
     return tree
 
-def walk(repo, oid, max_results=100):
-    """Return max_result commits in the history starting from oid"""
-    history = []
-    parents = [oid]
+def create_walker(repo, start_oid, maxcnt=100):
+    class GitWalker:
+        def __init__(self, start_oid, maxcnt):
+            # Priority-queue to always have the newest commit
+            self.commits = [ repo[start_oid] ]
+            # Avoid duplicates when two histories converge
+            self.visited = set()
+            # Remaining allowed iterations
+            self.rem_allowed = maxcnt
 
-    while len(parents) > 0 and len(history) <= max_results:
-        cur = repo[parents.pop(0)]
-        if cur in history:
-            # Avoid duplicates by ignoring commits already added
-            continue
-        history.append(cur)
-        parents += cur.parents
+        def __iter__(self):
+            return self
 
-    return sorted(history, reverse=True)
+        def __next__(self):
+            def _heappush_max(heap, item):
+                """Push item onto heap, maintaining the max-heap invariant."""
+                heap.append(item)
+                heapq._siftdown_max(heap, 0, len(heap) - 1)
+
+            while True:
+                if len(self.commits) == 0 or self.rem_allowed == 0:
+                    # No more commits left
+                    raise StopIteration()
+
+                # Process next commit
+                cur = heapq._heappop_max(self.commits)
+                if cur.oid in self.visited:
+                    # Skip commit if already visited
+                    continue
+
+                self.visited.add(cur.oid)
+                for parent in cur.parents:
+                    _heappush_max(self.commits, repo[parent])
+
+                # Used one more allowed commit
+                self.rem_allowed -= 1
+                # Give commit to caller
+                return cur
+
+    return GitWalker(start_oid, maxcnt)
 
 
 def collect_path_oids(repo, tree_id, path):
