@@ -50,6 +50,8 @@
 
 .commit_code {
     display: inline-block;
+    width: 100%;
+    overflow: scroll;
 }
 
 .commit_code * {
