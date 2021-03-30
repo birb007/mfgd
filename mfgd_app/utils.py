@@ -3,9 +3,8 @@ import binascii
 import difflib
 import re
 import string
-import heapq
 
-from mpygit import mpygit
+from mpygit import mpygit, gitutil
 
 from pygments import highlight
 from pygments.lexers import get_lexer_for_filename
@@ -47,99 +46,6 @@ def resolve_path(repo, oid, path):
 
     return tree
 
-def create_walker(repo, start_oid, maxcnt=100):
-    class GitWalker:
-        def __init__(self, start_oid, maxcnt):
-            # Priority-queue to always have the newest commit
-            self.commits = [ repo[start_oid] ]
-            # Avoid duplicates when two histories converge
-            self.visited = set()
-            # Remaining allowed iterations
-            self.rem_allowed = maxcnt
-
-        def __iter__(self):
-            return self
-
-        def __next__(self):
-            def _heappush_max(heap, item):
-                """Push item onto heap, maintaining the max-heap invariant."""
-                heap.append(item)
-                heapq._siftdown_max(heap, 0, len(heap) - 1)
-
-            while True:
-                if len(self.commits) == 0 or self.rem_allowed == 0:
-                    # No more commits left
-                    raise StopIteration()
-
-                # Process next commit
-                cur = heapq._heappop_max(self.commits)
-                if cur.oid in self.visited:
-                    # Skip commit if already visited
-                    continue
-
-                self.visited.add(cur.oid)
-                for parent in cur.parents:
-                    _heappush_max(self.commits, repo[parent])
-
-                # Used one more allowed commit
-                self.rem_allowed -= 1
-                # Give commit to caller
-                return cur
-
-    return GitWalker(start_oid, maxcnt)
-
-
-def collect_path_oids(repo, tree_id, path):
-    path_oids = []
-    for path_entry in split_path(path):
-        tree_entry = repo[tree_id][path_entry]
-        assert tree_entry is not None
-        path_oids.append((tree_entry.name, tree_entry.oid))
-        tree_id = tree_entry.oid
-    return path_oids
-
-
-def match_oids(repo, tree_id, path_oids):
-    for name, oid in path_oids:
-        tree = repo[tree_id]
-        ent = tree[name]
-        if ent is None:
-            return False
-        if ent.oid == oid:
-            return True
-        tree_id = ent.oid
-    return False
-
-
-def get_file_history(repo, commit, path, max_dist=100):
-    """Get the latest commit that changed the specified path"""
-    base_oids = collect_path_oids(repo, commit.tree, path)
-
-    i = 0
-    while i < max_dist:
-        if len(commit.parents) == 0:
-            return commit
-        parent = commit.parents[0]
-        if not match_oids(repo, repo[parent].tree, base_oids):
-            return commit
-        commit = repo[parent]
-        i += 1
-    return commit
-
-
-def find_branch_or_commit(repo, oid):
-    try:
-        obj = repo[oid]
-        if obj is None or not isinstance(obj, mpygit.Commit):
-            raise ValueError()
-        return obj
-    except ValueError:
-        try:
-            return repo[repo.heads[oid]]
-        except KeyError:
-            return None
-
-
 def hex_dump(binary):
     ALLOWED_CHARS = set(string.ascii_letters + string.digits + string.punctuation)
     N_BYTES_ROW = 16
@@ -172,7 +78,8 @@ def hex_dump(binary):
 def tree_entries(repo, target, path, tree):
     clean_entries = []
     for entry in tree:
-        entry.last_change = get_file_history(repo, target, path + "/" + entry.name)
+        entry.last_change = gitutil.get_latest_change(repo, \
+                                target.oid, (*split_path(path), entry.name))
         if not entry.isdir() and not entry.issubmod():
             blob = repo[entry.oid]
             entry.is_binary = blob.is_binary

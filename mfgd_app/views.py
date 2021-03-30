@@ -112,7 +112,7 @@ def view(request, permission, repo_name, oid, path):
     # First we normalize the path so libgit2 doesn't choke
     path = utils.normalize_path(path)
 
-    commit = utils.find_branch_or_commit(repo, oid)
+    commit = repo[oid]
     if commit is None or not isinstance(commit, mpygit.Commit):
         return HttpResponse("Invalid commit ID")
 
@@ -139,7 +139,7 @@ def view(request, permission, repo_name, oid, path):
             context["code"] = utils.highlight_code(path, code)
         else:
             context["code"] = code
-        commit = utils.get_file_history(repo, commit, path)
+        commit = gitutil.get_latest_change(repo, commit.oid, utils.split_path(path))
         context["change"] = commit
     else:
         return HttpResponse("Unsupported object type")
@@ -216,7 +216,7 @@ def info(request, permission, repo_name, oid):
     db_repo_obj = get_object_or_404(Repository, name=repo_name)
     repo = mpygit.Repository(db_repo_obj.path)
 
-    commit = utils.find_branch_or_commit(repo, oid)
+    commit = repo[oid]
     if commit is None or not isinstance(commit, mpygit.Commit):
         return HttpResponse("Invalid branch or commit ID")
 
@@ -253,14 +253,14 @@ def chain(request, permission, repo_name, oid):
     # Open a repo object to the requested repo
     repo = mpygit.Repository(db_repo_obj.path)
 
-    obj = utils.find_branch_or_commit(repo, oid)
+    obj = repo[oid]
     if obj is None:
         return HttpResponse("Invalid branch or commit ID")
 
     context = {
         "repo_name": repo_name,
         "oid": oid,
-        "commits": utils.create_walker(repo, obj.oid),
+        "commits": gitutil.walk(repo, obj.oid, 100),
         "can_manage": permission == Permission.CAN_MANAGE,
     }
     return render(request, "chain.html", context=context)
