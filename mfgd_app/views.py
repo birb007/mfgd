@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django import urls
 from pathlib import Path
+from django.http import HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import requires_csrf_token
@@ -27,19 +28,20 @@ def default_branch(db_repo_obj):
 
 def index(request):
     context_dict = {}
-    if request.user.is_anonymous:
-        accessible_repos = Repository.objects.filter(isPublic=True)
-    elif request.user.userprofile.isAdmin:
-        accessible_repos = Repository.objects.all()
-    else:
-        try:
-            profile = UserProfile.objects.get(user=request.user)
-            restricted_repos = Repository.objects.all().filter(
-                canaccess__user__pk=profile.id
-            )
-            accessible_repos = accessible_repos.union(restricted_repos)
-        except UserProfile.DoesNotExist:
-            pass
+
+    accessible_repos = Repository.objects.filter(isPublic=True)
+    if not request.user.is_anonymous:
+        if request.user.userprofile.isAdmin:
+            accessible_repos = Repository.objects.all()
+        else:
+            try:
+                profile = UserProfile.objects.get(user=request.user)
+                restricted_repos = Repository.objects.all().filter(
+                    canaccess__user__pk=profile.id
+                )
+                accessible_repos = accessible_repos.union(restricted_repos)
+            except UserProfile.DoesNotExist:
+                pass
 
     for repo in accessible_repos:
         repo.default_branch = default_branch(repo)
@@ -107,7 +109,8 @@ def view_default(request, repo_name):
 @verify_user_permissions
 def view(request, permission, repo_name, oid, path):
     if permission == permission.NO_ACCESS:
-        raise Http404("no matching repository")
+        # TODO use Http404
+        return HttpResponseNotFound("no matching repository")
 
     db_repo_obj = get_object_or_404(Repository, name=repo_name)
     repo = mpygit.Repository(db_repo_obj.path)
@@ -115,7 +118,11 @@ def view(request, permission, repo_name, oid, path):
     # First we normalize the path so libgit2 doesn't choke
     path = utils.normalize_path(path)
 
-    commit = repo[oid]
+    try:
+        commit = repo[oid]
+    except KeyError:
+        raise Http404("invalid head")
+
     if commit is None or not isinstance(commit, mpygit.Commit):
         return HttpResponse("Invalid commit ID")
 
@@ -285,7 +292,8 @@ def manage_repo(request, permission, repo_name):
             self.can_manage = permission == Permission.CAN_MANAGE
 
     if permission != permission.CAN_MANAGE:
-        raise Http404("no matching repository")
+        # TODO to use Http404
+        return HttpResponseNotFound("no matching repository")
 
     db_repo = get_object_or_404(Repository, name=repo_name)
 
@@ -301,7 +309,6 @@ def manage_repo(request, permission, repo_name):
                 raise ValueError("invalid management action")
         except (json.decoder.JSONDecodeError, ValueError, TypeError) as e:
             # return exception message
-            print("post failed")
             return HttpResponse(e.args[0], status=400)
         return HttpResponse(status=200)
 
