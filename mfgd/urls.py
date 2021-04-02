@@ -25,10 +25,10 @@ urlpatterns = [
     re_path(
         r"(?P<repo_name>[-_.\w]+)/view/(?P<oid>\w+)/(?P<path>\S*)/?", views.view, name="view"
     ),
-    re_path(r"(?P<repo_name>[-_.\w]+)/view/?", views.view_default, name="view_default"),
+    re_path(r"(?P<repo_name>[-_.\w]+)/view/?$", views.view_default, name="view_default"),
     re_path(r"(?P<repo_name>[-_.\w]+)/info/(?P<oid>\w+)/?", views.info, name="info"),
     re_path(r"(?P<repo_name>[-_.\w]+)/chain/(?P<oid>\w+)/?", views.chain, name="chain"),
-    re_path(r"(?P<repo_name>[-_.\w]+)/chain/?", views.chain_default, name="chain_default"),
+    re_path(r"(?P<repo_name>[-_.\w]+)/chain/?$", views.chain_default, name="chain_default"),
     re_path(r"(?P<repo_name>[-_.\w]+)/manage/?", views.manage_repo, name="manage_repo"),
     path("admin/", admin.site.urls),
     path("logout/", views.user_logout, name="logout"),
