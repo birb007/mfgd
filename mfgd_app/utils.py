@@ -136,6 +136,9 @@ def verify_user_permissions(endpoint):
                 permission = Permission.CAN_VIEW
         except (UserProfile.DoesNotExist, CanAccess.DoesNotExist):
             pass
+
+        if request.user.userprofile.isAdmin:
+            permission = permission.CAN_MANAGE
         return endpoint(request, permission, *args, **kwargs)
 
     return _inner

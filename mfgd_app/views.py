@@ -27,8 +27,11 @@ def default_branch(db_repo_obj):
 
 def index(request):
     context_dict = {}
-    accessible_repos = Repository.objects.filter(isPublic=True)
-    if not request.user.is_anonymous:
+    if request.user.is_anonymous:
+        accessible_repos = Repository.objects.filter(isPublic=True)
+    elif request.user.userprofile.isAdmin:
+        accessible_repos = Repository.objects.all()
+    else:
         try:
             profile = UserProfile.objects.get(user=request.user)
             restricted_repos = Repository.objects.all().filter(
@@ -268,11 +271,16 @@ def chain(request, permission, repo_name, oid):
 
 @verify_user_permissions
 def manage_repo(request, permission, repo_name):
-    class UserPerm:
-        def __init__(self, id, name, email, permission):
-            self.id = id
-            self.name = name
-            self.email = email
+    class ProfilePerm:
+        def __init__(self, profile, permission):
+            self.id = profile.id
+            self.name = profile.user.username
+            self.email = profile.user.email
+            self.isAdmin = profile.isAdmin
+
+            # admins can see everything
+            if self.isAdmin:
+                permission = Permission.CAN_MANAGE
             self.can_view = permission == Permission.CAN_VIEW
             self.can_manage = permission == Permission.CAN_MANAGE
 
@@ -290,9 +298,11 @@ def manage_repo(request, permission, repo_name):
             elif action == "publicize":
                 update_repo_visibility(db_repo, payload)
             else:
-                raise ValueError
-        except (json.decoder.JSONDecodeError, ValueError, TypeError):
-            return HttpResponse("malformed payload", status=400)
+                raise ValueError("invalid management action")
+        except (json.decoder.JSONDecodeError, ValueError, TypeError) as e:
+            # return exception message
+            print("post failed")
+            return HttpResponse(e.args[0], status=400)
         return HttpResponse(status=200)
 
     users = []
@@ -308,7 +318,7 @@ def manage_repo(request, permission, repo_name):
             pass
 
         users.append(
-            UserPerm(profile.id, profile.user.username, profile.user.email, permission)
+            ProfilePerm(profile, permission)
         )
 
     context = {
@@ -326,7 +336,7 @@ def update_profile_permissions(repo, manager, payload):
         # let KeyError bubble up to callsite
         val = payload[name]
         if not isinstance(val, type):
-            raise TypeError
+            raise TypeError(f"invalid parameter \"{name}\" (expected \"{type}\")")
         return val
 
     user_id = get_entry("id", str)
@@ -334,10 +344,12 @@ def update_profile_permissions(repo, manager, payload):
         user_id = int(user_id)
         profile = UserProfile.objects.get(id=user_id)
     except UserProfile.DoesNotExist:
-        raise ValueError
+        raise ValueError("cannot change nonexistent user")
 
-    if manager == profile:
+    if profile == manager:
         raise ValueError("cannot change own permissions")
+    elif profile.isAdmin:
+        raise ValueError("cannot change permissions of admin")
 
     visible = get_entry("visible", bool)
     manage = get_entry("manage", bool)
@@ -358,14 +370,12 @@ def update_repo_visibility(repo, payload):
         # let KeyError bubble up to callsite
         val = payload[name]
         if not isinstance(val, type):
-            raise TypeError
+            raise TypeError(f"invalid parameter \"{name}\" (expected \"{type}\")")
         return val
 
     public = get_entry("public", bool)
     repo.isPublic = public
     repo.save()
-    context = {"repo_name": repo_name, "oid": oid, "commits": utils.walk(repo, obj.oid)}
-    return render(request, "chain.html", context=context)
 
 
 def manage(request):
@@ -376,7 +386,6 @@ def manage(request):
             repo.default_branch = default_branch(repo)
         context_dict['repositories'] = repos
         return render(request, "manage.html", context=context_dict)
-
     else:
         return redirect('index')
 

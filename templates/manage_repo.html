@@ -26,16 +26,26 @@ Manage Repository
     <tr>
         <td id="{{ user.id }}-name">{{ user.name }}</td>
         <td>{{ user.email }}</td>
+
         <td><input type="checkbox" id="{{ user.id }}-visibility"
         {% if user.can_view or user.can_manage %}
             checked
         {% endif %}
-        onclick="update_perm(this)" />
+        onclick="update_perm(this)"
+        {% if user.isAdmin %}
+            disabled
+        {% endif %}
+        />
+
         <td><input type="checkbox" id="{{ user.id }}-management"
         {% if user.can_manage %}
             checked
         {% endif %}
-        onclick="update_perm(this)" />
+        onclick="update_perm(this)"
+        {% if user.isAdmin %}
+            disabled
+        {% endif %}
+        />
     </tr>
     {% endfor %}
 </table>
@@ -43,7 +53,7 @@ Manage Repository
 <div id="serv-msg"></div>
 
 <script>
-function make_req(json, success, failure) {
+function make_req(json, success) {
     var msg_field = document.getElementById("serv-msg");
     var xhr = new XMLHttpRequest();
 
@@ -52,7 +62,7 @@ function make_req(json, success, failure) {
             if (xhr.status == 200) {
                 msg_field.innerHTML = "<strong>" + success + "</strong>";
             } else {
-                msg_field.innerHTML = "<strong>" + failure + "</strong>";
+                msg_field.innerHTML = "<strong>" + xhr.responseText + "</strong>";
             }
         } else {
             msg_field.innerHTML = "<strong>Request failed</strong>";
@@ -70,9 +80,8 @@ function publicize(box) {
             "action": "publicize",
             "public": box.checked
         });
-    const success = "Successfully changed gobal visibility ";
-    const failure = "Failed to changed global visibility";
-    make_req(json, success, failure);
+    const success = "Successfully changed gobal visibility";
+    make_req(json, success);
 }
 
 function update_perm(box) {
@@ -92,8 +101,7 @@ function update_perm(box) {
     });
 
     const success = "Successfully updated permissions for user: " + name;
-    const failure = "Failed to update permissions for user: " + name;
-    make_req(json, success, failure);
+    make_req(json, success);
 }
 </script>
 {% endblock %}
