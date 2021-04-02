@@ -1,4 +1,5 @@
 import uuid
+import json
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
@@ -88,3 +89,35 @@ class PermissionTestCase(TestCase):
         self.client.logout()
         response = self.client.get("/")
         self.assertEqual(URL in response.content.decode(), False)
+
+    def test_cannot_modify_admin_perms(self):
+        self.client.login(username="manager", password="")
+        admin = UserProfile.objects.get(user__username="admin")
+
+        payload = {"action": "update_perm", "id": f"{admin.id}", "visible": True, "manage": False}
+        response = self.client.post("/repo/manage/", json.dumps(payload),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_cannot_modify_own_perms(self):
+        self.client.login(username="manager", password="")
+        manager = UserProfile.objects.get(user__username="manager")
+
+        payload = {"action": "update_perm", "id": f"{manager.id}", "visible": True, "manage": False}
+        response = self.client.post("/repo/manage/", json.dumps(payload),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 400)
+
+    def test_can_modify_perms(self):
+        self.client.login(username="manager", password="")
+        regular = UserProfile.objects.get(user__username="regular")
+
+        payload = {"action": "update_perm", "id": f"{regular.id}", "visible": True, "manage": False}
+        response = self.client.post("/repo/manage/", json.dumps(payload),
+                content_type="application/json")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(CanAccess.objects.filter(user=regular).exists())
+
