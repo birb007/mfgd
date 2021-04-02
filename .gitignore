@@ -4,3 +4,5 @@ __pycache__
 db.sqlite3
 # Ignore repos
 repositories
+# Ignore tests
+tests/repo
