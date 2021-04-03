@@ -5,16 +5,29 @@
 Manage Repository
 {% endblock %}
 
+{% block head_block %}
+<link rel="stylesheet" href="{% static 'style/manage_repo.css' %}" />
+{% endblock %}
+
 {% block body_block %}
-<h1>Manage Repository</h1>
+<h1>Manage repository</h1>
 
-<b>Make repository public</b>
-<input type="checkbox" id="publicize" onclick="publicize(this)"
-{% if is_public %}
-    checked
-{% endif %}
-/>
+<span class="box-label">Global settings</span>
+<div id="global-settings">
+    <table id="global-settings-table">
+        <tr>
+            <td>Make repository public</td>
+            <td>
+                <input type="checkbox" id="publicize" onclick="publicize(this)"
+                {% if is_public %}
+                    checked
+                {% endif %}/>
+            </td>
+        </tr>
+    </table>
+</div>
 
+<span class="box-label">User access</span>
 <table class="mfgd_table" id="user-table">
     <tr>
         <th>Username</th>
@@ -60,12 +73,12 @@ function make_req(json, success) {
     xhr.onloadend = function() {
         if (xhr.readyState == XMLHttpRequest.DONE) {
             if (xhr.status == 200) {
-                msg_field.innerHTML = "<strong>" + success + "</strong>";
+                msg_field.innerHTML = success;
             } else {
-                msg_field.innerHTML = "<strong>" + xhr.responseText + "</strong>";
+                msg_field.innerHTML = xhr.responseText;
             }
         } else {
-            msg_field.innerHTML = "<strong>Request failed</strong>";
+            msg_field.innerHTML = "Request failed";
         }
     }
     xhr.open("POST", "{% url 'manage_repo' repo_name %}");

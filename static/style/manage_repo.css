@@ -1,0 +1,27 @@
+
+h1 {
+    margin-bottom: 20px;
+}
+
+.box-label {
+    display: block;
+    margin-bottom: 10px;
+}
+
+#global-settings {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 10px;
+}
+
+#global-settings-table td {
+    padding: 5px;
+}
+
+#serv-msg {
+    padding: 10px;
+    font-style: italic;
+}
