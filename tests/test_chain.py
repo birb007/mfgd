@@ -32,6 +32,9 @@ class ChainTestCase(TestCase):
 
         self.client = Client()
 
+    def tearDown(self):
+        Repository.objects.all().delete()
+
     def _get_chain(self, repo_name):
         db_repo = Repository.objects.get(name=repo_name)
         repo = mpygit.Repository(db_repo.path)
