@@ -22,7 +22,7 @@ REPO_DIR.mkdir()
 
 def create_profile(username, password, email="", is_admin=False):
     user, created = User.objects.get_or_create(
-        username=username, email=email, password=make_password(password)
+        username=username, email=email, password=make_password(password), is_superuser=is_admin
     )
     if created:
         user.save()
@@ -69,11 +69,9 @@ def populate():
 
 def create_users():
     users = {
-        "richard": ("GNU/Linux", "rms@gnu.org"),
         "birb": ("squawk", "bird@birdcage.info", True),
-        "mate": ("soylicious", "mate@fsf.org", True),
+        "mate": ("not today", "mate@fsf.org", True),
         "paul": ("something idk", "paul@paulbeka.com"),
-        "luke": ("bugman", "luke@lukesmith.xyz"),
         "david": ("vs software goliath", "david@slingshots.r.us"),
         "geohot": ("lol @ s0ny", "geohot@fast.ai"),
         "linus": ("i hate cpp", "linus@kernel.org"),
@@ -99,7 +97,7 @@ def create_repositories(users):
             "https://github.com/birb007/mfgd.git",
             "Self-hosted moderately friendly Git display written in Django.",
             False,
-            users["richard"],
+            users["vader"],
         ),
         "sauron": (
             "https://github.com/birb007/sauron.git",
@@ -110,7 +108,7 @@ def create_repositories(users):
         "mcc": (
             "https://github.com/kukrimate/mcc.git",
             "[WIP] Project goal: C99 compiler.",
-            False,
+            True,
             users["mate"],
         ),
         "momo_project": (
@@ -118,12 +116,6 @@ def create_repositories(users):
             "",
             True,
             users["paul"],
-        ),
-        "based.cooking": (
-            "https://github.com/LukeSmithxyz/based.cooking.git",
-            "A simple culinary website.",
-            True,
-            users["luke"],
         ),
     }
 
@@ -143,19 +135,15 @@ def apply_permissions(repositories, users):
     permissions = {
         repositories["mfgd"]: {
             "manage": (users["birb"], users["mate"], users["paul"]),
-            "view": (users["luke"],),
+            "view": (users["enrique"],),
         },
         repositories["mcc"]: {
             "manage": (users["mate"],),
-            "view": (),
+            "view": (users["pasta"],),
         },
         repositories["momo_project"]: {
             "manage": (users["paul"],),
-            "view": (users["birb"], users["richard"]),
-        },
-        repositories["based.cooking"]: {
-            "manage": (users["luke"], users["richard"]),
-            "view": (users["mate"], users["paul"], users["birb"]),
+            "view": (users["birb"],),
         },
     }
     with concurrent.futures.ThreadPoolExecutor() as executor:
