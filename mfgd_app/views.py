@@ -260,19 +260,23 @@ def chain(request, permission, repo_name, oid):
         raise Http404("no matching repository")
 
     db_repo_obj = get_object_or_404(Repository, name=repo_name)
-    # Open a repo object to the requested repo
     repo = mpygit.Repository(db_repo_obj.path)
-
-    obj = repo[oid]
-    if obj is None:
-        return HttpResponse("Invalid branch or commit ID")
 
     context = {
         "repo_name": repo_name,
         "oid": oid,
-        "commits": gitutil.walk(repo, obj.oid, 100),
         "can_manage": permission == Permission.CAN_MANAGE,
     }
+
+    try:
+        obj = repo[oid]
+        if obj is None:
+            return HttpResponse("Invalid branch or commit ID")
+    except KeyError:
+        pass
+    else:
+        context["commits"] = gitutil.walk(repo, obj.oid, 100)
+
     return render(request, "chain.html", context=context)
 
 
