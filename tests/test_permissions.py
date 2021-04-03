@@ -1,5 +1,4 @@
 import json
-import uuid
 import re
 
 from mpygit import mpygit
