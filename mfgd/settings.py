@@ -130,3 +130,7 @@ MEDIA_URL = "/media/"
 
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_URL = "/static/"
+
+# Application specific settings
+
+LOGIN_URL = "/login/"

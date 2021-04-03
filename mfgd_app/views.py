@@ -166,11 +166,14 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                return redirect("index")
+                redirect_url = request.POST.get("redirect", reverse("index"))
+                return redirect(redirect_url)
             else:
                 context["error"] = "Account disabled"
         else:
             context["error"] = "Invalid credentials"
+    else:
+        context["redirect"] = request.GET.get("next", reverse("index"))
     return render(request, "login.html", context=context)
 
 

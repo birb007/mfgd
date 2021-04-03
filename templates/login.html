@@ -18,6 +18,7 @@ Login
     <div class="login_label">Password</div>
     <div class="login_control"><input type="password" name="password" size="30" /></div>
     <div class="login_submit"><input type="submit" value="Login" /></div>
+    <input type="hidden" name="redirect" value="{{ redirect }}">
 <div id="serv-msg">
     {% if error %}
         <strong>{{ error|escape }}</strong>
