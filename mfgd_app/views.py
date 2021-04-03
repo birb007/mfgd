@@ -202,7 +202,7 @@ def user_register(request):
 @login_required
 def user_logout(request):
     logout(request)
-    return redirect("index")
+    return redirect(request.META.get('HTTP_REFERER'))
 
 
 @verify_user_permissions
