@@ -3,10 +3,12 @@
 
 {% block title_block %}Manage Admins{% endblock %}
 
+{% block head_block %}
+<link rel="stylesheet" href="{% static 'style/manage.css' %}" />
+{% endblock %}
+
 {% block body_block %}
-    <center><a href="{% url 'add_repo' %}"><button style="padding: 10px 10px; text-align: center;">Add a repository</button></a></center>
-    <br><br>
-	<table class="mfgd_table">
+<table class="mfgd_table">
     <tr>
         <th>Repository</th>
         <th>Description</th>
@@ -15,13 +17,18 @@
     </tr>
     {% for repo in repositories %}
     <tr>
-        <td><a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a></td>
+        <td>
+            <a href="/{{ repo.name }}/view/{{ repo.default_branch }}">{{ repo.name }}</a>
+        </td>
         <td>{{ repo.description|truncatechars:30 }}</td>
         <td>{{ repo.default_branch }}</td>
         <td>
-            <button type="submit"><a href="delete_repo/{{ repo.name }}" />Delete</button>
+            <a class="button" href="delete_repo/{{ repo.name }}">Delete</a>
         </td>
     </tr>
     {% endfor %}
 </table>
+<center>
+    <a id="add-button" class="button" href="{% url 'add_repo' %}">Add a repository</a>
+</center>
 {% endblock %}

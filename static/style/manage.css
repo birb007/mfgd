@@ -1,0 +1,13 @@
+.button {
+    display: inline-block;
+    color: white;
+    padding: 5px;
+    background: #1fbfa7;
+    border: 1px solid #199481;
+    border-radius: 5px;
+}
+
+#add-button {
+    margin-top: 20px;
+    padding: 15px;
+}
