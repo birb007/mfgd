@@ -4,6 +4,7 @@ TEST_REPO_DIR=tests/repo
 REPO_LINEAR=$TEST_REPO_DIR/linear
 REPO_SIMPLE=$TEST_REPO_DIR/simple
 REPO_N_MERGE=$TEST_REPO_DIR/n_merge
+REPO_DIRS=$TEST_REPO_DIR/dirs
 
 # create simple repository
 #   consists of no files
@@ -47,6 +48,26 @@ if [ ! -d $REPO_N_MERGE ]; then
     git commit -a -m "commit #6"
     git checkout master
     git merge stage --no-edit
+    popd
+fi
+
+if [ ! -d $REPO_DIRS ]; then
+    git init $REPO_DIRS
+    pushd $REPO_DIRS
+    echo "#1" > file1
+    git add .
+    git commit -m "add file1"
+    echo "#2" > file2
+    git add .
+    git commit -m "add file2"
+    mkdir dir1
+    touch dir1/.keep
+    git add .
+    git commit -m "add dir1"
+    mkdir dir2
+    touch dir2/.keep
+    git add .
+    git commit -m "add dir2"
     popd
 fi
 
