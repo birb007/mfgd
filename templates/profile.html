@@ -15,7 +15,7 @@ Profile
     <div class="container">
         <img class="profile_img" src="{{ user.userprofile.image.url }}">
         <h2 >{{ user.username }}</h2>
-        <p>{{ user.email }}</p> 
+        <p>{{ user.email }}</p>
     </div>
     <form method="POST" action="{% url 'profile' %}" id="form1" enctype="multipart/form-data">
         {% csrf_token %}
@@ -27,7 +27,7 @@ Profile
     </form>
     <form method="POST" action="{% url 'profile' %}" id="form2">
         {% csrf_token %}
-        <table> 
+        <table>
             {{ pw_form }}
         </table>
     </form>

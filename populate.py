@@ -26,7 +26,10 @@ def create_profile(username, password, email="", is_admin=False):
     )
     if created:
         user.save()
-    
+    profile, created = UserProfile.objects.get_or_create(user=user, isAdmin=is_admin)
+    if created:
+        profile.save()
+    return profile
 
 
 def create_repo(name, url, description, is_public, owner):

@@ -184,6 +184,10 @@ def user_register(request):
             user = user_form.save()
             user.set_password(user.password)
             user.save()
+            # create user profile
+            user_profile = UserProfile(user=user)
+            user_profile.save()
+            login(request, user)
             return redirect("index")
     else:
         user_form = UserForm()
@@ -454,7 +458,6 @@ def add_repo_form(request):
             canaccess.canManage = True
             canaccess.save()
     return redirect("manage")
-
 
 def error_404(request, exception):
     return render(request, "404.html", {})
