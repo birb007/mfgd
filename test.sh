@@ -23,7 +23,7 @@ if [ ! -d $REPO_LINEAR ]; then
 fi
 
 if [ ! -d $REPO_N_MERGE ]; then
-    git init $REPO_N_MERGE --initial-branch=main
+    git init $REPO_N_MERGE
     pushd $REPO_N_MERGE
     echo "#1" >> file
     git add file
@@ -37,7 +37,7 @@ if [ ! -d $REPO_N_MERGE ]; then
     cat file >> file.new
     mv file.new file
     git commit -a -m "commit #4"
-    git checkout main
+    git checkout master
     echo "#5" >> file
     git commit -a -m "commit #5"
     git checkout stage
@@ -45,7 +45,7 @@ if [ ! -d $REPO_N_MERGE ]; then
     cat file >> file.new
     mv file.new file
     git commit -a -m "commit #6"
-    git checkout main
+    git checkout master
     git merge stage --no-edit
     popd
 fi

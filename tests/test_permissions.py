@@ -1,5 +1,6 @@
-import uuid
 import json
+import uuid
+import re
 
 from django.test import TestCase, Client
 from django.contrib.auth.models import User
@@ -65,17 +66,17 @@ class PermissionTestCase(TestCase):
 
         for username, status in users:
             self.client.login(username=username, password="")
-            response = self.client.get("/repo/view/main", follow=True)
+            response = self.client.get("/repo/view/", follow=True)
             self.assertEqual(response.status_code, status,
                 f"user \"{username}\" had unexpected viewing access")
 
         self.client.logout()
-        response = self.client.get("/repo/view/main", follow=True)
+        response = self.client.get("/repo/view/", follow=True)
         self.assertEqual(response.status_code, 404,
                 "anonymous user had unexpected viewing access")
 
     def test_dashboard_indexes_visible_repo(self):
-        URL = "<a href=\"/repo/view/main\">repo</a>"
+        URL = r"""<a href="/repo/view/\w*">repo</a>"""
         users = [
             ("admin", True), ("manager", True),
             ("viewer", True), ("regular", False),
@@ -84,7 +85,7 @@ class PermissionTestCase(TestCase):
         for username, present in users:
             self.client.login(username=username, password="")
             response = self.client.get("/")
-            self.assertEqual(URL in response.content.decode(), present)
+            self.assertEqual(bool(re.search(URL, response.content.decode())), present)
 
         self.client.logout()
         response = self.client.get("/")
