@@ -6,29 +6,20 @@ Register
 {% endblock %}
 
 {% block head_block %}
-<link rel="stylesheet" href="{% static 'style/login.css' %}" />
+<link rel="stylesheet" href="{% static 'style/form.css' %}" />
 {% endblock %}
 
 {% block body_block %}
-<h1 class="login_msg">Registration</h1>
+<h1 class="form_msg">Registration</h1>
 <form method="post" action="{% url 'register' %}">
     {% csrf_token %}
-    <div class="login_label">Username</div>
-    <div class="login_control"><input type="text" name="username" size="30" /></div>
-    <div class="login_label">Email</div>
-    <div class="login_control"><input type="email" name="email" size="30" /></div>
-    <div class="login_label">Password</div>
-    <div class="login_control"><input type="password" name="password" size="30" /></div>
-    <div class="login_submit"><input class="button" type="submit" value="Register" /></div>
-
-<div id="serv-msg">
-{% if form.errors %}
     {% for field in form %}
-        {% for error in field.errors %}
-        <strong>{{ error|escape }}</strong>
-        {% endfor %}
+        <div class="form_label">{{ field.label }}</div>
+        <div class="form_control">{{ field }}</div>
+        {% if field.errors %}
+        <div class="form_error">{{ field.errors }}</div>
+        {% endif %}
     {% endfor %}
-{% endif %}
-</div>
+    <div class="form_submit"><input class="button" type="submit" value="Register" /></div>
 </form>
 {% endblock %}

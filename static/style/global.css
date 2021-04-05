@@ -2,6 +2,7 @@
  * Global page style
  */
 
+/* Sane defaults */
 * {
     box-sizing: border-box;
     font-family: sans-serif;
@@ -9,6 +10,11 @@
     padding: 0px;
     margin: 0px;
     color: black;
+}
+
+/* Sane list sizing */
+ul {
+    list-style: disc inside none;
 }
 
 h1 {
@@ -118,6 +124,6 @@ img {
 
 /* Server message */
 #serv-msg {
-    padding: 10px;
+    padding: 10px 0;
     font-style: italic;
 }

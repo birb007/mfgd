@@ -3,31 +3,40 @@
  */
 
 #global_center {
-    min-width: 0%;
+    min-width: 420px;
 }
 
-.login_msg {
+.form_msg {
     text-align: center;
     margin-bottom: 50px;
 }
 
-.login_label {
+.form_label {
     margin-top: 20px;
 }
 
-.login_control {
+.form_control {
     margin-top: 10px;
 }
 
-.login_control input {
+.form_control input {
+    width: 100%;
+}
+
+.form_error {
+    padding: 10px 0;
+    font-style: italic;
+}
+
+.form_control input {
     padding: 10px;
 }
 
-.login_submit {
+.form_submit {
     margin-top: 20px;
 }
 
-.login_submit input {
+.form_submit input {
     width: 100%;
     padding: 5px;
 }

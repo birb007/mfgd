@@ -9,6 +9,7 @@ from django import urls
 from pathlib import Path
 from django.http import HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import requires_csrf_token
 from mpygit import mpygit, gitutil
@@ -16,12 +17,12 @@ from mpygit import mpygit, gitutil
 from mfgd_app import utils
 from mfgd_app.utils import verify_user_permissions, Permission
 from mfgd_app.models import Repository, CanAccess, UserProfile
-from mfgd_app.forms import UserForm, RepoForm, UserUpdateForm, ProfileUpdateForm, PasswordForm
+from mfgd_app.forms import RegisterForm, RepoForm, UserUpdateForm, ProfileUpdateForm
 
 
 def default_branch(db_repo_obj):
     # NOTE: someone please fix this if you can, but the pygit2 API does not
-    # provide access to the global HEAD as it's not a proper ref
+    # provide access to the global HEAD as it"s not a proper ref
     with open(db_repo_obj.path + "/.git/HEAD") as f:
         return f.read().split("/")[-1].strip()
 
@@ -115,7 +116,7 @@ def view(request, permission, repo_name, oid, path):
     db_repo_obj = get_object_or_404(Repository, name=repo_name)
     repo = mpygit.Repository(db_repo_obj.path)
 
-    # First we normalize the path so libgit2 doesn't choke
+    # First we normalize the path so libgit2 doesn"t choke
     path = utils.normalize_path(path)
 
     try:
@@ -167,81 +168,78 @@ def user_login(request):
         if user:
             if user.is_active:
                 login(request, user)
-                redirect_url = request.POST.get("redirect", reverse("index"))
-                return redirect(redirect_url)
+                return redirect(reverse("index"))
             else:
                 context["error"] = "Account disabled"
         else:
             context["error"] = "Invalid credentials"
-    else:
-        context["redirect"] = request.GET.get("next", reverse("index"))
     return render(request, "login.html", context=context)
 
 
 def user_register(request):
-    registered = False
-    errors = ""
+    context = {}
+
     if request.method == "POST":
-        user_form = UserForm(request.POST)
-        if user_form.is_valid():
-            # create user account
-            user = user_form.save()
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            # Create user account
+            user = form.save()
             user.set_password(user.password)
             user.save()
-            # create user profile
+            # Create user profile
             user_profile = UserProfile(user=user)
             user_profile.save()
+
+            # Redirect to index page
             login(request, user)
-            return redirect("index")
+            return redirect(reverse("index"))
+
+        context["form"] = form
     else:
-        user_form = UserForm()
+        context["form"] = RegisterForm()
 
     return render(
         request,
         "register.html",
-        context={"form": user_form, "registered": registered},
+        context,
     )
 
 
 @login_required
 def user_logout(request):
     logout(request)
-    return redirect("index")
+    return redirect(reverse("index"))
 
 @login_required
 def user_profile(request):
 
-    if request.method == 'POST' and 'change_profile' in request.POST:
+    if request.method == "POST" and "profile_change" in request.POST:
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.userprofile)
 
-        if u_form.is_valid() and p_form.is_valid():
+        if u_form.is_valid():
             u_form.save()
+        if p_form.is_valid():
             p_form.save()
-            return redirect("profile")
     else:
         u_form = UserUpdateForm(instance=request.user)
         p_form = ProfileUpdateForm(instance=request.user.userprofile)
-        pw_form = PasswordForm(request.user)
 
-    if request.method == 'POST' and 'change_password' in request.POST:
-         pw_form = PasswordForm(request.user, request.POST)
+    if request.method == "POST" and "password_change" in request.POST:
+         pw_form = PasswordChangeForm(request.user, request.POST)
          if pw_form.is_valid():
-                user = pw_form.save()
-                update_session_auth_hash(request, user)
-                return redirect("index")
+            user = pw_form.save()
+            update_session_auth_hash(request, user)
     else:
-        u_form = UserUpdateForm(instance=request.user)
-        p_form = ProfileUpdateForm(instance=request.user.userprofile)
-        pw_form = PasswordForm(request.user)
+        pw_form = PasswordChangeForm(request.user)
 
     context = {
-        'u_form':u_form,
-        'p_form':p_form,
-        'pw_form':pw_form,
-        }
+        "u_form":u_form,
+        "p_form":p_form,
+        "pw_form":pw_form,
+    }
 
-    return render(request, 'profile.html', context)
+    return render(request, "profile.html", context)
 
 
 @verify_user_permissions
@@ -436,10 +434,10 @@ def manage(request):
         repos = Repository.objects.all()
         for repo in repos:
             repo.default_branch = default_branch(repo)
-        context_dict['repositories'] = repos
+        context_dict["repositories"] = repos
         return render(request, "manage.html", context=context_dict)
     else:
-        return redirect('index')
+        return redirect("index")
 
 
 def delete_repo(request, repo_name):

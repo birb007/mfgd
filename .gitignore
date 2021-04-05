@@ -6,3 +6,5 @@ db.sqlite3
 repositories
 # Ignore tests
 tests/repo
+# Profile pictures
+media/profile_pics
