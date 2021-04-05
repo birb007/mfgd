@@ -158,9 +158,13 @@ if __name__ == "__main__":
     # Do migrations
     execute_from_command_line([ "manage.py", "migrate" ])
 
-    # Re-create repositories directory
     if REPO_DIR.exists():
-        shutil.rmtree(REPO_DIR)
+        if os.name == 'nt':
+            # The proper API really doesn't like git's file permissions on
+            # Windows, so we do this
+            os.system(f"rmdir /S /Q {REPO_DIR}")
+        else:
+            shutil.rmtree(REPO_DIR)
     REPO_DIR.mkdir()
 
     # Main population script
