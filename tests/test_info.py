@@ -118,7 +118,7 @@ class InfoTestCase(TestCase):
         content = response.content.decode()
 
         ANCHOR_REGEX = (
-            r"""<a class="commit_inspect" [\s\S]*"""
+            r"""<a class="button commit_inspect" [\s\S]*"""
                 f"""href="/linear/view/{commit.oid}/">"""
                 r"""Inspect Tree"""
             r"""\s*</a>"""
