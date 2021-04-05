@@ -3,22 +3,19 @@ import concurrent.futures
 from pathlib import Path
 import subprocess
 import sys
+import shutil
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mfgd.settings")
 import django
-
 django.setup()
+
+from django.core.management import execute_from_command_line
 from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from mfgd_app.models import Repository, UserProfile, CanAccess
 
-
-# create repository folder
+# Repository location
 REPO_DIR = Path("repositories")
-if REPO_DIR.exists():
-    sys.exit("[ KO ] repositories directory already exists, exiting...")
-REPO_DIR.mkdir()
-
 
 def create_profile(username, password, email="", is_admin=False):
     user, created = User.objects.get_or_create(
@@ -154,4 +151,17 @@ def apply_permissions(repositories, users):
 
 
 if __name__ == "__main__":
+    # Create new DB
+    DB_FILE = Path("db.sqlite3")
+    if DB_FILE.exists():
+        DB_FILE.unlink()
+    # Do migrations
+    execute_from_command_line([ "manage.py", "migrate" ])
+
+    # Re-create repositories directory
+    if REPO_DIR.exists():
+        shutil.rmtree(REPO_DIR)
+    REPO_DIR.mkdir()
+
+    # Main population script
     populate()
