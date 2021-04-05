@@ -1,36 +1,47 @@
 # MFGD
-The "Mildly Friendly Git Display". Team project by LB01 - Team 1B.
+The "Mildly Friendly Git Display" team project by LB01 - Team 1B.
 
-**NOTE**: while we do support Windows on a best effort basis, this project
-was designed to run on Unix-like operating systems, thus Windows support might
-have some minor issues.
+MFGD is a simplistic Git viewer to inspect and publicise Git repositories. MFGD implements web-based user authentication and permissions to supports private repositories for repository access management. MFGD must be bootstrapped manually by creating an initial administrator (see installation instructions below). MFGD was implemented using Python and Django with minimal dependencies.
 
-## Cloning
+**WARNING:** Support for Windows is a best-effort basis which may present stability and deployment issues; MFGD was designed for deployment on a Unix-like environment (MFGD was developed under Linux).
 
-**IMPORTANT**: clone using:
+## Deployment
+### Installation
+[Python 3.7+](https://www.python.org/downloads/) and [Git](https://git-scm.com/downloads) must be installed and in your **PATH**.
+Install using the below command (regular `git clone` will not clone submodule dependencies).
+```term
+$ git clone --recurse-submodule https://github.com/kukrimate/mfgd
+```
+If the repository was cloned without retrieving submodules then run the below command.
+```term
+$ git submodule update --init mpygit
+```
+Then install Python dependencies.
+```term
+$ python3 -m pip install -r requirements.txt --user
+```
 
-```git clone --recurse-submodule https://github.com/kukrimate/mfgd```.
+### Execution
 
-Normal clones will not have a required submodule, to get a working tree
-from a messed up clone run:
+MFGD must be bootstrapped to create the initial administrator account.
+If you are deploying MFGD for **yourself** then run.
+```term
+$ python3 bootstrap.py
+```
+Otherwise, if you are deploying MFGD for demonstration purposes then setup placeholder data (this will **clone external** repositories).
+```term
+$ python3 populate.py
+```
+After installation and bootstrapping then run the below and browse to `http://localhost:8000`.
+```term
+$ python3 manage.py runserver
+```
+(see `python3 manage.py --help` to specify address and port and other configurable options).
 
-```git submodule update --init mpygit```.
-
-## Running
-First Python 3.7+ must be installed and **in PATH**.
-
-After that run: ```pip install -r requirements.txt```.
-This will install all the dependencies for the main application.
-
-To run `populate.py`, git must be installed and the `git`
-command present **in PATH**.
-
-After all the prerequisits are present, first run
-````python populate.py```` to create a new database.
-Then the application can be started with ```python manage.py runserver```.
-
-## Unit tests
-**NOTE**: Unit tests only work on Unix-like operating system
-(or Unix like environment like Cygwin, MSYS, or git bash) on Windows.
-
-Run: `./test.sh` to create the test repositories and execute the Unit tests.
+## Unit Tests
+**Warning:** Unit tests only work under Unix-like environments with the previously mentioned prerequisites.
+Execute
+```term
+$ ./test.sh
+```
+to setup and execute the unit tests.
