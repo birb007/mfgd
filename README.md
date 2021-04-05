@@ -1,7 +1,7 @@
 # MFGD
 The "Mildly Friendly Git Display" team project by LB01 - Team 1B.
 
-MFGD is a simplistic Git viewer to inspect and publicise Git repositories. MFGD implements web-based user authentication and permissions to supports private repositories for repository access management. MFGD must be bootstrapped manually by creating an initial administrator (see installation instructions below). MFGD was implemented using Python and Django with minimal dependencies.
+MFGD is a Git viewer to inspect and publicise Git repositories. It implements web-based user authentication and permissions to supports private repositories for repository access management. MFGD must be bootstrapped manually by creating an initial administrator (see installation instructions below). MFGD was implemented using Python and Django with minimal dependencies.
 
 **WARNING:** Support for Windows is a best-effort basis which may present stability and deployment issues; MFGD was designed for deployment on a Unix-like environment (MFGD was developed under Linux).
 
