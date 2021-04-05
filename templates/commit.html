@@ -31,7 +31,7 @@ Commit info - {{ oid }}
             </td>
         </tr>
     </table>
-    <a class="commit_inspect" href="{% url 'view' repo_name oid '' %}">Inspect Tree</a>
+    <a class="button commit_inspect" href="{% url 'view' repo_name oid '' %}">Inspect Tree</a>
     <table class="commit_modified">
     {% for change in changes %}
     <tr>

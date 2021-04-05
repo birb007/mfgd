@@ -22,12 +22,6 @@
 
 .commit_inspect {
     float: right;
-    display: inline-block;
-    padding: 10px;
-    color: white;
-    background: #1fbfa7;
-    border: 1px solid #199481;
-    border-radius: 5px;
 }
 
 .commit_modified {
