@@ -24,7 +24,11 @@ Tree
     {% for entry in entries %}
     <tr>
         <td class="{{ entry.type_str }}">
+            {% if entry.issubmod %}
+            <a href="">{% select_icon entry %} {{ entry.name }}</a>
+            {% else %}
             <a href="{{ entry.name }}/">{% select_icon entry %} {{ entry.name }}</a>
+            {% endif %}
         </td>
         <td class="commit-msg">{{ entry.last_change.message|truncatechars:50 }}</td>
         <td class="commit-id">
