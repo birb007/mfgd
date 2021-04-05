@@ -16,22 +16,25 @@
 }
 
 .form_control {
-    margin-top: 10px;
+    margin-top: 12px;
 }
 
 .form_control input {
     width: 100%;
 }
 
-.form_error {
-    padding: 10px 0;
-    font-style: italic;
+.form_checkbox input {
+    width: initial;
 }
 
 .form_control input {
     padding: 10px;
 }
 
+.form_error {
+    padding: 10px 0;
+    font-style: italic;
+}
 .form_submit {
     margin-top: 20px;
 }

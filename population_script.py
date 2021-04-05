@@ -19,7 +19,8 @@ REPO_DIR = Path("repositories")
 
 def create_profile(username, password, email="", is_admin=False):
     user, created = User.objects.get_or_create(
-        username=username, email=email, password=make_password(password), is_superuser=is_admin
+        username=username, email=email, password=make_password(password),
+        is_superuser=is_admin, is_staff=is_admin
     )
     if created:
         user.save()

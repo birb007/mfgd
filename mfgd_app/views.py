@@ -455,7 +455,7 @@ def delete_repo(request, permisson, repo_name):
     return redirect("index")
 
 def add_repo(request):
-    return render(request, "add_repo.html")
+    return render(request, "add_repo.html", context={ "form": RepoForm() })
 
 def add_repo_form(request):
     if request.method == "POST" and request.user.is_superuser:

@@ -8,13 +8,17 @@ h1 {
     margin-bottom: 10px;
 }
 
-#global-settings {
+.manage-box {
     width: 100%;
     padding: 10px;
     margin-bottom: 20px;
     border: 1px solid gray;
     border-radius: 3px;
     padding: 10px;
+}
+
+#user-table {
+    margin-bottom: 20px;
 }
 
 #global-settings-table td {

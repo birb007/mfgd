@@ -20,15 +20,18 @@ class RegisterForm(forms.ModelForm):
         )
 
 class RepoForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(RepoForm, self).__init__(*args, **kwargs)
+        self.fields["isPublic"].label = "Make repository public"
 
-	class Meta:
-		model = Repository
-		fields = (
-			"name",
-			"path",
-			"description",
-			"isPublic",
-		)
+    class Meta:
+        model = Repository
+        fields = (
+            "name",
+            "path",
+            "description",
+            "isPublic",
+        )
 
 class UserUpdateForm(forms.ModelForm):
     class Meta:
