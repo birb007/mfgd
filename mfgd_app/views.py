@@ -121,7 +121,8 @@ def view(request, permission, repo_name, oid, path):
     try:
         commit = repo[oid]
     except KeyError:
-        raise Http404("invalid head")
+        # TODO use Http404
+        return HttpResponseNotFound("invalid head")
 
     if commit is None or not isinstance(commit, mpygit.Commit):
         return HttpResponse("Invalid commit ID")
