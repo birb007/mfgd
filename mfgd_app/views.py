@@ -8,7 +8,7 @@ from django.urls import reverse
 from django import urls
 from pathlib import Path
 from django.http import HttpResponseNotFound
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import requires_csrf_token
@@ -212,7 +212,6 @@ def user_logout(request):
 
 @login_required
 def user_profile(request):
-
     if request.method == "POST" and "profile_change" in request.POST:
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.userprofile)
