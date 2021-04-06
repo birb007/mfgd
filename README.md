@@ -7,7 +7,7 @@ MFGD is a Git viewer to inspect and publicise Git repositories. It implements we
 
 ## Deployment
 ### Installation
-[Python 3.7+](https://www.python.org/downloads/) and [Git](https://git-scm.com/downloads) must be installed and in your **PATH**.
+[Python 3.7+](https://www.python.org/downloads/) and [Git](https://git-scm.com/downloads) must be installed and in your **PATH** (it is recommended that Windows users install [Git BASH](https://gitforwindows.org/) to support unit testing).
 Install using the below command (regular `git clone` will not clone submodule dependencies).
 ```term
 $ git clone --recurse-submodule https://github.com/kukrimate/mfgd
@@ -16,7 +16,7 @@ If the repository was cloned without retrieving submodules then run the below co
 ```term
 $ git submodule update --init mpygit
 ```
-Then install Python dependencies.
+Move into the cloned repository then install Python dependencies.
 ```term
 $ python3 -m pip install -r requirements.txt --user
 ```
@@ -39,9 +39,14 @@ $ python3 manage.py runserver
 (see `python3 manage.py --help` to specify address and port and other configurable options).
 
 ## Unit Tests
-**Warning:** Unit tests only work under Unix-like environments with the previously mentioned prerequisites.
+**Warning:** Unit tests only work under Unix-like environments (including [Git BASH](https://gitforwindows.org/)) with the previously mentioned prerequisites.
+
 Execute
 ```term
 $ ./test.sh
 ```
 to setup and execute the unit tests.
+
+## External Sources
+
+[jQuery](https://jquery.com/) is used for the repository management panel which is requested from the [Google CDN](https://developers.google.com/speed/libraries/#jquery). [Git](https://git-scm.com/) repositories are interacted with on the local filesystem using [mpygit](https://github.com/kukrimate/mpygit) (a module developed internally). [Bootstrap](https://getbootstrap.com/) minified CSS and JavaScript plugin bundle is requested from [BootstrapCDN](https://www.bootstrapcdn.com/) (hosted by [jsdelivr](https://www.jsdelivr.com/)).
