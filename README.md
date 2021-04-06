@@ -49,4 +49,4 @@ to setup and execute the unit tests.
 
 ## External Sources
 
-[jQuery](https://jquery.com/) is used for the repository management panel which is requested from the [Google CDN](https://developers.google.com/speed/libraries/#jquery). [Git](https://git-scm.com/) repositories are interacted with on the local filesystem using [mpygit](https://github.com/kukrimate/mpygit) (a module developed internally). [Bootstrap](https://getbootstrap.com/) minified CSS and JavaScript plugin bundle is requested from [BootstrapCDN](https://www.bootstrapcdn.com/) (hosted by [jsdelivr](https://www.jsdelivr.com/)).
+[jQuery](https://jquery.com/) is used for the repository management panel which is requested from the [Google CDN](https://developers.google.com/speed/libraries/#jquery). [Git](https://git-scm.com/) repositories are interacted with on the local filesystem using [mpygit](https://github.com/kukrimate/mpygit) (a module developed internally).
