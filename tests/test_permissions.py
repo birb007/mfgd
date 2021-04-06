@@ -173,9 +173,9 @@ class PermissionTestCase(TestCase):
         self.assertEqual(response.status_code, 404)
 
     def test_superadmin_management_panel(self):
-        ENDPOINT = "/manage"
+        ENDPOINT = "/add_repo"
 
-        for user in User.objects.all():
+        for user in User.objects.filter(userprofile__isAdmin=False):
             self.client.login(username=user.username, password="")
             response = self.client.get(ENDPOINT, follow=True)
             self.assertEqual(response.request["PATH_INFO"], "/")

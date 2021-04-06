@@ -2,11 +2,12 @@ import binascii
 import json
 import re
 
+from pathlib import Path
+
 from django.http import HttpResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django import urls
-from pathlib import Path
 from django.http import HttpResponseNotFound
 from django.contrib.auth import authenticate, login, logout, update_session_auth_hash
 from django.contrib.auth.forms import PasswordChangeForm
@@ -352,7 +353,7 @@ def manage_repo(request, permission, repo_name):
                 update_details(db_repo,payload)
             else:
                 raise ValueError("invalid management action")
-        except (json.decoder.JSONDecodeError, ValueError, TypeError) as e:
+        except (json.decoder.JSONDecodeError, ValueError, TypeError, KeyError) as e:
             # return exception message
             return HttpResponse(e.args[0], status=400)
         return HttpResponse(status=200)
@@ -455,6 +456,8 @@ def delete_repo(request, permisson, repo_name):
     return redirect("index")
 
 def add_repo(request):
+    if request.user.is_anonymous or not request.user.userprofile.isAdmin:
+        return redirect("index")
     return render(request, "add_repo.html", context={ "form": RepoForm() })
 
 def add_repo_form(request):
