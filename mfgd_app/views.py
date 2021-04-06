@@ -23,6 +23,8 @@ from mfgd_app.forms import RegisterForm, RepoForm, UserUpdateForm, ProfileUpdate
 
 
 def default_branch(db_repo_obj):
+    """Get default branch for a Repository database object.
+    """
     # NOTE: someone please fix this if you can, but the pygit2 API does not
     # provide access to the global HEAD as it"s not a proper ref
     with open(db_repo_obj.path + "/.git/HEAD") as f:
@@ -30,6 +32,8 @@ def default_branch(db_repo_obj):
 
 
 def index(request):
+    """Display MFGD index page of visible repositories.
+    """
     context_dict = {}
 
     accessible_repos = Repository.objects.filter(isPublic=True)
@@ -54,6 +58,18 @@ def index(request):
     return render(request, "index.html", context_dict)
 
 def read_blob(blob):
+    """Read then blob data and specialised template.
+
+    Read a blob's data then if a blob is a binary blob then return the
+    binary blob template else the textual blob template. The binary blob
+    template requires a hex dump of the contents whereas the textual blob
+    is merely the contents themselves.
+
+    A maximum size of 100K is read.
+
+    Returns:
+        (template, None) if blob exceeds 100K else (template, contents).
+    """
     # 100K
     MAX_BLOB_SIZE = 100 * 5 << 10
 
@@ -69,6 +85,16 @@ def read_blob(blob):
 
 
 def gen_crumbs(repo_name, oid, path):
+    """Generate crumbs for tree navigation.
+
+    Args:
+        repo_name: name of repository in database.
+        oid: subtree object ID.
+        path: path relative to Git repository root.
+
+    Returns:
+        List of Crumb objects used to reference backward positions in subtrees.
+    """
     class Crumb:
         def __init__(self, name, url):
             self.name = name
@@ -80,6 +106,7 @@ def gen_crumbs(repo_name, oid, path):
     crumbs = []
     parts = utils.split_path(path)
     for off in range(len(parts)):
+        # normalise relative paths for joining in template
         relative_path = "/".join(parts[: off + 1]) + "/"
         url = urls.reverse(
             "view", kwargs={"repo_name": repo_name, "oid": oid, "path": relative_path}
@@ -88,6 +115,16 @@ def gen_crumbs(repo_name, oid, path):
     return crumbs
 
 def gen_branches(repo_name, repo, oid):
+    """Return all branches in Git repository on disk.
+
+    Args:
+        repo_name: name of repository in database.
+        repo: mpygit repository object of Git repository on disk.
+        oid: filter object id from branches.
+
+    Returns:
+        List of Branch objects for each head in Git repository.
+    """
     class Branch:
         def __init__(self, name, url):
             self.name = name
@@ -101,6 +138,8 @@ def gen_branches(repo_name, repo, oid):
 
 
 def view_default(request, repo_name):
+    """Shortcut method to view repository default branch without specification.
+    """
     db_repo = get_object_or_404(Repository, name=repo_name)
     branch = default_branch(db_repo)
     url = urls.reverse(
@@ -111,6 +150,18 @@ def view_default(request, repo_name):
 
 @verify_user_permissions
 def view(request, permission, repo_name, oid, path):
+    """Display blob or tree.
+
+    If the path in the URL references a blob then the blob view template
+    is rendered (which is specialised to whether the blob is a binary blob
+    or not). Otherwise, a tree view is presented which displays the contents
+    of a (sub)tree.
+
+    Args:
+        permission: permission rights of accessing user.
+        repo_name: name of repository to inspect.
+        path: path to blob or tree.
+    """
     if permission == permission.NO_ACCESS:
         # TODO use Http404
         return HttpResponseNotFound("no matching repository")
@@ -144,12 +195,14 @@ def view(request, permission, repo_name, oid, path):
         "can_manage": permission == Permission.CAN_MANAGE,
     }
 
+    # specialise view to display object type correctly
     if isinstance(obj, mpygit.Tree):
         template = "tree.html"
         context["entries"] = utils.tree_entries(repo, commit, path, obj)
     elif isinstance(obj, mpygit.Blob):
         template, code = read_blob(obj)
         if template == "blob.html":
+            # highlight code in textual blobs
             context["code"] = utils.highlight_code(path, code)
         else:
             context["code"] = code
@@ -162,6 +215,8 @@ def view(request, permission, repo_name, oid, path):
 
 
 def user_login(request):
+    """Create new user session.
+    """
     context = {}
     if request.method == "POST":
         username = request.POST.get("username")
@@ -179,6 +234,8 @@ def user_login(request):
 
 
 def user_register(request):
+    """Register new User and UserProfile.
+    """
     context = {}
 
     if request.method == "POST":
@@ -209,11 +266,15 @@ def user_register(request):
 
 @login_required
 def user_logout(request):
+    """Logout user session.
+    """
     logout(request)
     return redirect(reverse("index"))
 
 @login_required
 def user_profile(request):
+    """Display or update user profile information.
+    """
     if request.method == "POST" and "profile_change" in request.POST:
         u_form = UserUpdateForm(request.POST, instance=request.user)
         p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.userprofile)
@@ -230,6 +291,8 @@ def user_profile(request):
          pw_form = PasswordChangeForm(request.user, request.POST)
          if pw_form.is_valid():
             user = pw_form.save()
+            # update user session to reflect credential changes this way the
+            # user does not have to login after they change their credentials
             update_session_auth_hash(request, user)
     else:
         pw_form = PasswordChangeForm(request.user)
@@ -245,6 +308,19 @@ def user_profile(request):
 
 @verify_user_permissions
 def info(request, permission, repo_name, oid):
+    """Display commit information.
+
+    Commit information includes:
+    - author name and email
+    - commit timestamp
+    - modified blobs
+    - deltas (including highlighted diffs)
+
+    Args:
+        permission: permission rights of accessing user.
+        repo_name: name of managed repository.
+        oid: commit object ID to inspect.
+    """
     class FileChange:
         def __init__(self, path, patch, status):
             self.path = path
@@ -287,6 +363,8 @@ def info(request, permission, repo_name, oid):
 
 
 def chain_default(request, repo_name):
+    """Shortcut method to chain endpoint providing default branch as oid.
+    """
     db_repo = get_object_or_404(Repository, name=repo_name)
     branch = default_branch(db_repo)
     url = urls.reverse("chain", kwargs={"repo_name": repo_name, "oid": branch})
@@ -295,6 +373,13 @@ def chain_default(request, repo_name):
 
 @verify_user_permissions
 def chain(request, permission, repo_name, oid):
+    """Display chain of Git repository commits.
+
+    Args:
+        permission: permission rights of accessing user.
+        repo_name: name of managed repository.
+        oid: offset object ID to walk from when listing commits.
+    """
     if permission == permission.NO_ACCESS:
         # TODO return Http404 properly
         return HttpResponseNotFound("no matching repository")
@@ -322,6 +407,28 @@ def chain(request, permission, repo_name, oid):
 
 @verify_user_permissions
 def manage_repo(request, permission, repo_name):
+    """Update repository access and attributes.
+
+    Endpoint is hit with AJAX requests to make dynamic requests which are
+    dispatched to their respective API handlers. Otherwise, a regular HTML
+    page is returned.
+
+    API errors are returned in a HTTP Bad Request (400) where the content is
+    a description of the error. API success is returned as a HTTP OK where the
+    content is "OK". Available  methods are:
+    - "publicize"
+    - "update_description"
+    - "update_perm"
+
+    See their individual docstrings for more information.
+
+    Args:
+        permission: permission rights of accessing user.
+        repo_name: name of managed repository.
+
+    Returns:
+        Rendered template if user browsers page or API response.
+    """
     class ProfilePerm:
         def __init__(self, profile, permission):
             self.id = profile.id
@@ -343,6 +450,7 @@ def manage_repo(request, permission, repo_name):
 
     if request.method == "POST":
         try:
+            # dispatch API request
             payload = json.loads(request.body)
             action = payload.get("action", None)
             if action == "update_perm":
@@ -387,6 +495,22 @@ def manage_repo(request, permission, repo_name):
 
 
 def update_profile_permissions(repo, manager, payload):
+    """[AJAX] Update UserProfile and CanAccess entries in database.
+
+    Request to be made using AJAX, the payload is a JSON blob
+    {"action": "update_perm", "id": int, "visible": bool, "manage": bool}
+    where "id" is the user id to change, "visible" is the repository visibility
+    rights for that user id, and "manage" is the repository management rights
+    for that user id.
+
+    A user performing changes may not modify the rights of themselves or admins.
+
+    Args:
+        repo: Repository database object.
+        manager: User performing update.
+        payload: JSON payload with format specified above.
+    """
+
     def get_entry(name, type):
         # let KeyError bubble up to callsite
         val = payload[name]
@@ -421,6 +545,17 @@ def update_profile_permissions(repo, manager, payload):
 
 
 def update_repo_visibility(repo, payload):
+    """[AJAX] Update repository public attribute in database.
+
+    Request to be made using AJAX, the payload is a JSON blob
+    {"action": "publicize", "public": bool}
+    where the "publicize" key is associated with the new public visibility
+    attribute.
+
+    Args:
+        repo: Repository database object.
+        payload: JSON payload with format specified above.
+    """
     def get_entry(name, type):
         # let KeyError bubble up to callsite
         val = payload[name]
@@ -434,16 +569,37 @@ def update_repo_visibility(repo, payload):
 
 
 def update_description(repo, payload):
+    """[AJAX] Change repository description in database.
+
+    Request to be made using AJAX, the payload is a JSON blob
+    {"action": "update_description", "description": str}
+    where the "description" key is associated with the new description.
+
+    Args:
+        repo: Repository database object.
+        payload: JSON payload with format specified above.
+    """
     repo.description = payload["description"]
     repo.save()
 
 @verify_user_permissions
 def delete_repo(request, permisson, repo_name):
+    """[AJAX] Delete repository from database **not** the filesystem.
+
+    Request to be made using AJAX, the request itself is RESTful.
+
+    Args:
+        request: Django request (implcit).
+        permission: Permissions representing user access rights.
+        repo_name: Repository name (PK) to remove from database.
+    """
     if request.user.is_superuser or permission.CAN_MANAGE:
         get_object_or_404(Repository, name=repo_name).delete()
     return redirect("index")
 
 def add_repo(request):
+    """Create new repository through HTTP form.
+    """
     if request.user.is_anonymous or not request.user.userprofile.isAdmin:
         return redirect("index")
 

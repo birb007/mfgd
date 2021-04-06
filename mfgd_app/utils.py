@@ -18,16 +18,20 @@ split_path_re = re.compile(r"/?([^/]+)/?")
 
 
 def split_path(path):
-    """Robust, regex-based, path splitter"""
+    """Robust, regex-based, path splitter
+    """
     return split_path_re.findall(path)
 
 
 def normalize_path(path):
-    """Normalize user-provided path"""
+    """Normalize user-provided path
+    """
     return "/".join(split_path(path))
 
 
 def resolve_path(repo, oid, path):
+    """Find object at specified path in Git repository.
+    """
     # Resolve tree id
     tree = repo[oid]
 
@@ -47,6 +51,22 @@ def resolve_path(repo, oid, path):
     return tree
 
 def hex_dump(binary):
+    """Create a hex-dump of binary data.
+
+    The hex dump consists of the offset, 1 byte columns, and an ascii decoding.
+
+    Args:
+        binary: binary string to dump.
+
+    Returns:
+        [(offset, colums, ascii), ...] where offset if the offset into the
+        binary data, columns is a string of indivudual bytes, and ascii is
+        a textual decoding of the binary data.
+
+    Examples
+        >>> hex_dump(b'\x89PNG\r\n\x1a\n\x00\x00\x00\rIHDR')
+        [('00000000', ['89 50 4e 47 0d 0a 1a 0a', '00 00 00 0d 49 48 44 52'], '.PNG........IHDR')]
+    """
     ALLOWED_CHARS = set(string.ascii_letters + string.digits + string.punctuation)
     N_BYTES_ROW = 16
     N_BYTES_COL = 8
@@ -76,6 +96,16 @@ def hex_dump(binary):
 
 
 def tree_entries(repo, target, path, tree):
+    """Get tree entries (depth=1) with their latest involved commits.
+
+    Args:
+        repo: mpygit Repository object.
+        target: target object id to walk from (epoch).
+        path: path to subtree to get listing.
+
+    Returns:
+        List of non-dir non-submodule entries.
+    """
     clean_entries = []
     for entry in tree:
         entry.last_change = gitutil.get_latest_change(repo, \
@@ -93,6 +123,19 @@ def tree_entries(repo, target, path, tree):
 
 
 def highlight_code(filename, code):
+    """Use pygments to highlight code contents based on filename.
+
+    Use a filename to get a lexer for the associated code contents. However,
+    if there is no lexer associated with that extension or name then a textual
+    listing is used instead.
+
+    Args:
+        filename: filename to use for highlighting lexer.
+        code: text to highlight with aforementioned lexer.
+
+    Returns:
+        highlighted code.
+    """
     if code is None:
         return None
 
@@ -110,6 +153,19 @@ class Permission(enum.IntEnum):
     CAN_MANAGE = 2
 
 def verify_user_permissions(endpoint):
+    """Denote requesting user access rights through parameter injection.
+
+    Inject Permission instance into second argument of decorated functions
+    representing the available user permissions by traversing the database.
+
+    Examples:
+        >>> @verify_user_permissions
+        >>> def my_endpoint(request, permission, *args):
+        ...     # permission is injected by the decorator
+        ...     if permission is Permission.NO_ACCESS:
+        ...         ...
+        ...     ...
+    """
     def _inner(request, *args, **kwargs):
         try:
             repo_name = kwargs["repo_name"]
