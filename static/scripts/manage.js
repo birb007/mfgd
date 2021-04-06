@@ -38,9 +38,9 @@ function update_perm(url, box) {
     const name = $(`#${user_id}-name`).text();
 
     if (!box.checked && category === "visibility") {
-        $(`#${user_id}-visibility`)[0].checked = box.checked;
-    } else if (box.checked && category === "management") {
         $(`#${user_id}-management`)[0].checked = box.checked;
+    } else if (box.checked && category === "management") {
+        $(`#${user_id}-visibility`)[0].checked = box.checked;
     }
 
     const json = JSON.stringify({
