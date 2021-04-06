@@ -15,14 +15,12 @@ function getCookie(name) {
     return cookieValue;
 }
 
-function update_details(url) {
+function update_desc(url) {
     const json = JSON.stringify({
-        "action":"update_details",
-        "name" : $("#name").val(),
-        "path" : $("#path").val(),
-        "desc" : $("#description").val(),
+        "action":"update_description",
+        "description" : $("#description").val(),
     });
-    const success = "Successfully changed value";
+    const success = "Successfully changed description";
     make_request(url, json, success);
 }
 

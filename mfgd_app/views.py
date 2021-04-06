@@ -349,8 +349,8 @@ def manage_repo(request, permission, repo_name):
                 update_profile_permissions(db_repo, request.user.userprofile, payload)
             elif action == "publicize":
                 update_repo_visibility(db_repo, payload)
-            elif action == "update_details":
-                update_details(db_repo,payload)
+            elif action == "update_description":
+                update_description(db_repo, payload)
             else:
                 raise ValueError("invalid management action")
         except (json.decoder.JSONDecodeError, ValueError, TypeError, KeyError) as e:
@@ -433,16 +433,10 @@ def update_repo_visibility(repo, payload):
     repo.save()
 
 
-def update_details(repo, payload):
-    repository = get_object_or_404(Repository, name=repo)
-    if repository.name != payload["name"]:
-        newRepo = Repository(name=payload["name"], path=payload["path"], description=payload["desc"],
-            isPublic=repository.isPublic)
-        repository.delete()
-        newRepo.save()
-    repository.path = payload["path"]
-    repository.description = payload["desc"]
-    repository.save()
+def update_description(repo, payload):
+    repo.description = payload["description"]
+    repo.save()
+
 
 def delete_repo(request, repo_name):
     if request.user.is_superuser:
