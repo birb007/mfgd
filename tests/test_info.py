@@ -62,7 +62,7 @@ class InfoTestCase(TestCase):
 
         committer_info, timestamp, msg = match.groups()
         name, email = committer_info.rsplit(" ", 1)
-        email = email.removeprefix("&lt;").removesuffix("&gt;")
+        email = email[4:-4]
 
         self.assertEqual(commit.committer.name, name)
         self.assertEqual(commit.committer.email, email)
