@@ -437,12 +437,6 @@ def update_description(repo, payload):
     repo.description = payload["description"]
     repo.save()
 
-
-def delete_repo(request, repo_name):
-    if request.user.is_superuser:
-        Repository.objects.filter(name=repo_name).delete()
-    return redirect("index")
-
 @verify_user_permissions
 def delete_repo(request, permisson, repo_name):
     if request.user.is_superuser or permission.CAN_MANAGE:
@@ -452,10 +446,10 @@ def delete_repo(request, permisson, repo_name):
 def add_repo(request):
     if request.user.is_anonymous or not request.user.userprofile.isAdmin:
         return redirect("index")
-    return render(request, "add_repo.html", context={ "form": RepoForm() })
 
-def add_repo_form(request):
-    if request.method == "POST" and request.user.is_superuser:
+    context = {"form": RepoForm()}
+
+    if request.method == "POST":
         repo_form = RepoForm(request.POST)
         if repo_form.is_valid():
             # create repo
@@ -465,11 +459,13 @@ def add_repo_form(request):
             canaccess = CanAccess(user=request.user.userprofile, repo=repo)
             canaccess.canManage = True
             canaccess.save()
-    return redirect("index")
+            return redirect("index")
+        else:
+            context["form"] = repo_form
+    return render(request, "add_repo.html", context=context)
 
 def error_404(request, exception):
     return render(request, "404.html", {})
-
 
 def error_500(request):
     return render(request, "500.html", {})

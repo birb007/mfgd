@@ -39,7 +39,6 @@ urlpatterns = [
     path('profile/', views.user_profile, name='profile'),
     path("<str:repo_name>/delete_repo/", views.delete_repo, name="delete_repo"),
     path("add_repo/", views.add_repo, name="add_repo"),
-    path("add_repo_form/", views.add_repo_form, name="add_repo_form")
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 
