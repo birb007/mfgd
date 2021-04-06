@@ -30,7 +30,7 @@ $ python3 bootstrap.py
 ```
 Otherwise, if you are deploying MFGD for demonstration purposes then setup placeholder data (this will **clone external** repositories).
 ```term
-$ python3 populate.py
+$ python3 population_script.py
 ```
 After installation and bootstrapping then run the below and browse to `http://localhost:8000`.
 ```term
