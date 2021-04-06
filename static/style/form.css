@@ -4,7 +4,7 @@
 
 @media only screen and (max-width: 800px) {
     #global_center {
-        min-width: 100%;
+        max-width: 100%;
         overflow: scroll;
     }
 }
