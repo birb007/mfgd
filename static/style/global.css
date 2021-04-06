@@ -45,6 +45,7 @@ img {
 
 /* Navigation bar */
 #global_nav {
+    z-index: 2;
     overflow: hidden;
     padding: 10px;
     width: 100%;
@@ -59,7 +60,6 @@ img {
 #global_nav a,
 #global_nav span {
     padding: 10px;
-    display: block;
     float: left;
 }
 
@@ -67,10 +67,33 @@ img {
     float: right;
 }
 
+/* Mobile nav bar */
+@media only screen and (max-width: 800px) {
+    #global_nav {
+        position: initial;
+    }
+    #global_nav * {
+        width: 100%;
+    }
+    #global_nav .right {
+        float: left;
+    }
+    #nav_seperator {
+        display: none;
+    }
+}
+
 /* Content */
 #global_wrap {
     padding-top: 4em; /* FIXME: is there a way to not hardcode this? */
     text-align: center;
+    max-width: 100%;
+}
+
+@media only screen and (max-width: 800px) {
+    #global_wrap {
+        padding-top: 0px;
+    }
 }
 
 #global_center {
@@ -87,6 +110,14 @@ img {
     border: 1px solid gray;
     border-radius: 3px;
     border-spacing: 0px;
+}
+
+@media only screen and (max-width: 800px) {
+    .mfgd_table {
+        display: block;
+        max-width: 100%;
+        overflow: scroll;
+    }
 }
 
 .mfgd_table th,

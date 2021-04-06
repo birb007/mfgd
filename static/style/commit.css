@@ -10,6 +10,13 @@
     border-radius: 3px;
 }
 
+@media only screen and (max-width: 800px) {
+    .commit_box {
+        max-width: 100%;
+        overflow: scroll;
+    }
+}
+
 /* Info */
 .commit_info {
     vertical-align: middle;

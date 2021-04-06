@@ -2,50 +2,50 @@
 {% load static %}
 
 <html>
-	<head>
+    <head>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" crossorigin="anonymous"></script>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         <!-- Page title !-->
-		<title>{% block title_block %}$PLACEHOLDER_TITLE${% endblock %}</title>
+        <title>{% block title_block %}$PLACEHOLDER_TITLE${% endblock %}</title>
         <!-- Global style !-->
         <link rel="stylesheet" href="{% static 'style/global.css' %}" />
         <link rel="stylehseet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
         <link rel="shortcut icon" type="image/x-icon" href="{% static 'favicon.ico' %}" />
         <!-- Page specific headers !-->
         {% block head_block %}{% endblock %}
-	</head>
+    </head>
 
-	<body>
-		<div id="global_nav">
-			{% if user.is_authenticated %}
-				<a class="right" href="{% url 'logout' %}">Logout</a>
-				<a class="right" href="{% url 'profile' %}">Profile</a>
-				<span class="right">Hello: {{ user.username }}</span>
-			{% else %}
-				<a class="right" href="{% url 'login' %}">Login</a>
-            	<a class="right" href="{% url 'register' %}">Register</a>
-			{% endif %}
+    <body>
+        <div id="global_nav">
             <a href="{% url 'index' %}">Dashboard</a>
             {% if user.is_superuser %}
                 <a href="{% url 'add_repo' %}">Add Repository</a>
             {% endif %}
             {% if repo_name %}
-            <span>|</span>
+            <span id="nav_seperator">|</span>
             <a href="{% url 'view' repo_name oid '' %}">Tree</a>
             <a href="{% url 'chain' repo_name oid %}">Commits</a>
                 {% if can_manage %}
                 <a href="{% url 'manage_repo' repo_name %}">Manage</a>
                 {% endif %}
             {% endif %}
+            {% if user.is_authenticated %}
+                <a class="right" href="{% url 'logout' %}">Logout</a>
+                <a class="right" href="{% url 'profile' %}">Profile</a>
+                <span class="right">Hello: {{ user.username }}</span>
+            {% else %}
+                <a class="right" href="{% url 'login' %}">Login</a>
+                <a class="right" href="{% url 'register' %}">Register</a>
+            {% endif %}
         </div>
 
         <div id="global_wrap">
             <div id="global_center">
-        		{% block body_block %}
-        			$PLACEHOLDER_BODY$
-        		{% endblock %}
+                {% block body_block %}
+                    $PLACEHOLDER_BODY$
+                {% endblock %}
             </div>
         </div>
-	</body>
+    </body>
 </html>

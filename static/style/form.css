@@ -2,8 +2,11 @@
  * Login page style
  */
 
-#global_center {
-    min-width: 420px;
+@media only screen and (max-width: 800px) {
+    #global_center {
+        min-width: 100%;
+        overflow: scroll;
+    }
 }
 
 .form_msg {

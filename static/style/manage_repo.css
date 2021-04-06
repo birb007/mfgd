@@ -17,6 +17,13 @@ h1 {
     padding: 10px;
 }
 
+@media only screen and (max-width: 800px) {
+    .manage-box {
+        max-width: 100%;
+        overflow: scroll;
+    }
+}
+
 #user-table {
     margin-bottom: 20px;
 }
