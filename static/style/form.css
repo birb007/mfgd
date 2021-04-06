@@ -22,8 +22,9 @@
     margin-top: 12px;
 }
 
-.form_control input {
+.form_control input, .form_control textarea {
     width: 100%;
+    max-width: 100%;
 }
 
 .form_checkbox input {

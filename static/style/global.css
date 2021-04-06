@@ -123,6 +123,7 @@ img {
 .mfgd_table th,
 .mfgd_table td {
     padding: 12px;
+    white-space: nowrap;
 }
 
 .mfgd_table th {

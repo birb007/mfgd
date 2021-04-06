@@ -24,6 +24,16 @@
     top: -70px;
 }
 
+@media only screen and (max-width: 800px) {
+    #global_center {
+        margin-top: 20px;
+    }
+    .profile_img {
+        position: initial;
+        margin-bottom: 20px;
+    }
+}
+
 h2 {
     font-size: 150%;
     margin-bottom: 5px;

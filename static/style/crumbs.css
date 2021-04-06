@@ -18,3 +18,16 @@
 .crumb_path {
     color: black;
 }
+
+@media only screen and (max-width: 800px) {
+    #crumbs_nav {
+        max-width: 100%;
+        overflow: scroll;
+        white-space: nowrap;
+    }
+    .crumb_branch, .crumb_path {
+        width: 100%;
+        display: block;
+        padding: 10px;
+    }
+}
