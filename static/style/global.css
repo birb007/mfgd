@@ -90,18 +90,22 @@ img {
     max-width: 100%;
 }
 
-@media only screen and (max-width: 800px) {
-    #global_wrap {
-        padding-top: 0px;
-    }
-}
-
 #global_center {
     max-width: 100%;
     display: inline-block;
     text-align: left;
-    min-width: 50%;
+    min-width: 20%;
     padding: 50px;
+}
+
+
+@media only screen and (max-width: 800px) {
+    #global_wrap {
+        padding-top: 0px;
+    }
+    #global_center {
+        padding: 10px;
+    }
 }
 
 /* Content table (both index page and tree) */
