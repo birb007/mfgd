@@ -7,6 +7,8 @@ Manage Repository
 
 {% block head_block %}
 <link rel="stylesheet" href="{% static 'style/manage_repo.css' %}" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="{% static 'scripts/manage.js' %}"></script>
 {% endblock %}
 
 {% block body_block %}
@@ -17,7 +19,7 @@ Manage Repository
         <tr>
             <td>Make repository public</td>
             <td>
-                <input type="checkbox" id="publicize" onclick="publicize(this)"
+                <input type="checkbox" id="publicize" onclick="publicize('{% url 'manage_repo' repo_name %}', this)"
                 {% if is_public %}
                     checked
                 {% endif %}/>
@@ -47,7 +49,7 @@ Manage Repository
         {% if user.can_view or user.can_manage %}
             checked
         {% endif %}
-        onclick="update_perm(this)"
+            onclick="update_perm('{% url 'manage_repo' repo_name %}', this)"
         {% if user.isAdmin %}
             disabled
         {% endif %}
@@ -57,7 +59,7 @@ Manage Repository
         {% if user.can_manage %}
             checked
         {% endif %}
-        onclick="update_perm(this)"
+        onclick="update_perm('{% url 'manage_repo' repo_name %}', this)"
         {% if user.isAdmin %}
             disabled
         {% endif %}
@@ -73,67 +75,4 @@ Manage Repository
 
 <div id="serv-msg"></div>
 
-<script>
-function make_req(json, success) {
-    var msg_field = document.getElementById("serv-msg");
-    var xhr = new XMLHttpRequest();
-
-    xhr.onloadend = function() {
-        if (xhr.readyState == XMLHttpRequest.DONE) {
-            if (xhr.status == 200) {
-                msg_field.innerHTML = success;
-            } else {
-                msg_field.innerHTML = xhr.responseText;
-            }
-        } else {
-            msg_field.innerHTML = "Request failed";
-        }
-    }
-    xhr.open("POST", "{% url 'manage_repo' repo_name %}");
-    xhr.setRequestHeader("Content-Type", "application/json; charset=utf-8");
-    xhr.setRequestHeader("X-CSRFToken", "{{ csrf_token }}");
-    xhr.send(json);
-
-}
-
-function update_details() {
-    const json = JSON.stringify({
-            "action":"update_details",
-            "name" : document.getElementById("name").value,
-            "path" : document.getElementById("path").value,
-            "desc" : document.getElementById("description").value
-        });
-    const success = "Successfully changed value";
-    make_req(json, success);
-}
-
-function publicize(box) {
-    const json = JSON.stringify({
-            "action": "publicize",
-            "public": box.checked
-        });
-    const success = "Successfully changed gobal visibility";
-    make_req(json, success);
-}
-
-function update_perm(box) {
-    const [user_id, category] = box.id.split("-");
-    const name = document.getElementById(user_id + "-name").innerHTML;
-    if (!box.checked && category === "visibility") {
-        document.getElementById(user_id + "-management").checked = box.checked;
-    } else if (box.checked && category === "management") {
-        document.getElementById(user_id + "-visibility").checked = box.checked;
-    }
-
-    const json = JSON.stringify({
-        "action": "update_perm",
-        "id": user_id,
-        "visible": document.getElementById(user_id + "-visibility").checked,
-        "manage": document.getElementById(user_id + "-management").checked
-    });
-
-    const success = "Successfully updated permissions for user: " + name;
-    make_req(json, success);
-}
-</script>
 {% endblock %}
