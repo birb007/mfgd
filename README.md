@@ -49,4 +49,4 @@ to setup and execute the unit tests.
 
 ## External Sources
 
-[jQuery](https://jquery.com/) is used for the repository management panel which is requested from the [Google CDN](https://developers.google.com/speed/libraries/#jquery). [Git](https://git-scm.com/) repositories are interacted with on the local filesystem using [mpygit](https://github.com/kukrimate/mpygit) (a module developed internally).
+[jQuery](https://jquery.com/) is used for the repository management panel which is requested from the [Google CDN](https://developers.google.com/speed/libraries/#jquery). [Git](https://git-scm.com/) repositories are interacted with on the local filesystem using [mpygit](https://github.com/kukrimate/mpygit) (a module developed internally). [Pygments](https://pygments.org/) is used for syntax highlighting. [Django](https://www.djangoproject.com/) is the overarching web framework for implementing MFGD.
