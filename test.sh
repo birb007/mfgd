@@ -86,4 +86,8 @@ if [ ! -d $REPO_FILES ]; then
     popd
 fi
 
-python3 manage.py test
+if [[ "$OSTYPE" == "msys" ]]; then
+    py manage.py test
+else
+    python3 manage.py test
+fi
