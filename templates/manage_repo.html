@@ -71,7 +71,7 @@ Manage Repository
 
 <span class="box-label">Danger zone</span>
 <div class="manage-box">
-    <a class='button' href='delete_repo/{{ repo.name }}'>Delete Repository</a>
+    <a class='button' href="{% url 'delete_repo' repo_name %}">Delete Repository</a>
 </div>
 
 <div id="serv-msg"></div>
