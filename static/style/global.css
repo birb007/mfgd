@@ -90,6 +90,12 @@ img {
     max-width: 100%;
 }
 
+@media only screen and (max-width: 800px) {
+    #global_wrap {
+        padding-top: 0px;
+    }
+}
+
 #global_center {
     max-width: 100%;
     display: inline-block;
