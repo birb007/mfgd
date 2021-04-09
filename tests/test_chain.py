@@ -13,22 +13,28 @@ class ChainTestCase(TestCase):
     REGEX_CHAIN_ENTS = (
         r"""<tr>\s*"""
         r"""<td class="commit-id">"""
-            r"""<a href="/linear/info/(?P<big_hash>[A-z0-9]*)/?">"""
-                r"""(?P<short_hash>[A-z0-9]*)"""
-            r"""</a>"""
+        r"""<a href="/linear/info/(?P<big_hash>[A-z0-9]*)/?">"""
+        r"""(?P<short_hash>[A-z0-9]*)"""
+        r"""</a>"""
         r"""</td>"""
         r"""\s*<td class="commit-msg">(?P<commit_msg>.*)</td>"""
         r"""\s*<td>(?P<author>.*)</td>"""
         r"""\s*<td class="commit-date">"""
-            r"""\s*<time datetime="[0-9-]*">(?P<date>[0-9-]*)</time>"""
+        r"""\s*<time datetime="[0-9-]*">(?P<date>[0-9-]*)</time>"""
         r"""\s*</td>"""
         r"""\s*</tr>"""
     )
 
     def setUp(self):
-        Repository.objects.create(name="simple", path="tests/repo/simple", isPublic=True)
-        Repository.objects.create(name="linear", path="tests/repo/linear", isPublic=True)
-        Repository.objects.create(name="n_merge", path="tests/repo/n_merge", isPublic=True)
+        Repository.objects.create(
+            name="simple", path="tests/repo/simple", isPublic=True
+        )
+        Repository.objects.create(
+            name="linear", path="tests/repo/linear", isPublic=True
+        )
+        Repository.objects.create(
+            name="n_merge", path="tests/repo/n_merge", isPublic=True
+        )
 
         self.client = Client()
 
@@ -47,14 +53,18 @@ class ChainTestCase(TestCase):
         content = self._get_chain("linear")
         repo = mpygit.Repository(Repository.objects.get(name="linear").path)
         repo_walker = gitutil.walk(repo, repo.HEAD, 5)
-        for fs_ent, match in zip(repo_walker, re.finditer(self.REGEX_CHAIN_ENTS, content)):
+        for fs_ent, match in zip(
+            repo_walker, re.finditer(self.REGEX_CHAIN_ENTS, content)
+        ):
             oid, short_oid, msg, committer, timestamp = match.groups()
             self.assertEqual(fs_ent.oid, oid)
             self.assertEqual(fs_ent.short_oid, short_oid)
             self.assertEqual(fs_ent.message, msg)
             self.assertEqual(fs_ent.committer.name, committer)
 
-            fs_timestamp = dt.utcfromtimestamp(fs_ent.committer.timestamp).strftime("%Y-%m-%d")
+            fs_timestamp = dt.utcfromtimestamp(fs_ent.committer.timestamp).strftime(
+                "%Y-%m-%d"
+            )
             self.assertEqual(fs_timestamp, timestamp)
 
     def test_correct_ordering(self):
@@ -63,7 +73,8 @@ class ChainTestCase(TestCase):
         is_sorted, _ = reduce(
             lambda acc, v: (acc[0] and acc[1] >= v, v),
             map(lambda x: x.group(5), re.finditer(self.REGEX_CHAIN_ENTS, content)),
-            (True, "9999-99-99"))
+            (True, "9999-99-99"),
+        )
         self.assertTrue(is_sorted)
 
     def test_n_way_merge_flattened(self):
@@ -86,4 +97,3 @@ class ChainTestCase(TestCase):
         self.assertEquals(response.status_code, 200)
         content = response.content.decode()
         self.assertFalse(re.search(self.REGEX_CHAIN_ENTS, content))
-

@@ -18,20 +18,17 @@ split_path_re = re.compile(r"/?([^/]+)/?")
 
 
 def split_path(path):
-    """Robust, regex-based, path splitter
-    """
+    """Robust, regex-based, path splitter"""
     return split_path_re.findall(path)
 
 
 def normalize_path(path):
-    """Normalize user-provided path
-    """
+    """Normalize user-provided path"""
     return "/".join(split_path(path))
 
 
 def resolve_path(repo, oid, path):
-    """Find object at specified path in Git repository.
-    """
+    """Find object at specified path in Git repository."""
     # Resolve tree id
     tree = repo[oid]
 
@@ -49,6 +46,7 @@ def resolve_path(repo, oid, path):
         tree = repo[tree_entry.oid]
 
     return tree
+
 
 def hex_dump(binary):
     """Create a hex-dump of binary data.
@@ -108,8 +106,9 @@ def tree_entries(repo, target, path, tree):
     """
     clean_entries = []
     for entry in tree:
-        entry.last_change = gitutil.get_latest_change(repo, \
-                                target.oid, (*split_path(path), entry.name))
+        entry.last_change = gitutil.get_latest_change(
+            repo, target.oid, (*split_path(path), entry.name)
+        )
         if not entry.isdir() and not entry.issubmod():
             blob = repo[entry.oid]
             entry.is_binary = blob.is_binary
@@ -152,6 +151,7 @@ class Permission(enum.IntEnum):
     CAN_VIEW = 1
     CAN_MANAGE = 2
 
+
 def verify_user_permissions(endpoint):
     """Denote requesting user access rights through parameter injection.
 
@@ -166,6 +166,7 @@ def verify_user_permissions(endpoint):
         ...         ...
         ...     ...
     """
+
     def _inner(request, *args, **kwargs):
         try:
             repo_name = kwargs["repo_name"]

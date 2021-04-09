@@ -7,6 +7,7 @@ import shutil
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "mfgd.settings")
 import django
+
 django.setup()
 
 from django.core.management import execute_from_command_line
@@ -17,10 +18,14 @@ from mfgd_app.models import Repository, UserProfile, CanAccess
 # Repository location
 REPO_DIR = Path("repositories")
 
+
 def create_profile(username, password, email="", is_admin=False):
     user, created = User.objects.get_or_create(
-        username=username, email=email, password=make_password(password),
-        is_superuser=is_admin, is_staff=is_admin
+        username=username,
+        email=email,
+        password=make_password(password),
+        is_superuser=is_admin,
+        is_staff=is_admin,
     )
     if created:
         user.save()
@@ -92,9 +97,11 @@ def create_users():
         "sphinx": ("pyr4m1ds", "pineapple@hak5.com"),
     }
     with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        for name, profile in zip(users, executor.map(lambda t: create_profile(t[0], *t[1]), users.items())):
+        for name, profile in zip(
+            users, executor.map(lambda t: create_profile(t[0], *t[1]), users.items())
+        ):
             users[name] = profile
-            print(f"[ OK ] created profile \"{name}\"")
+            print(f'[ OK ] created profile "{name}"')
     return users
 
 
@@ -122,7 +129,7 @@ def create_repositories(users):
             "https://github.com/birb007/lambda.git",
             "λ-calculus calculus solver capable of β-reduction and α-conversion, written in C.",
             True,
-            users["birb"]
+            users["birb"],
         ),
         "momo_project": (
             "https://github.com/paulbeka/momo_project.git",
@@ -176,7 +183,7 @@ def create_repositories(users):
             "https://github.com/birb007/veracity.git",
             "SAT solver implemented in Python.",
             False,
-            users["birb"]
+            users["birb"],
         ),
         "simple_exceptoins": (
             "https://github.com/birb007/simple_exceptions.git",
@@ -220,9 +227,7 @@ def apply_permissions(repositories, users):
         },
     }
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        executor.map(
-            lambda t: update_repo_perms(t[0], t[1]), permissions.items()
-        )
+        executor.map(lambda t: update_repo_perms(t[0], t[1]), permissions.items())
     print("[*] all repository permissions applied")
 
 
@@ -232,10 +237,10 @@ if __name__ == "__main__":
     if DB_FILE.exists():
         DB_FILE.unlink()
     # Do migrations
-    execute_from_command_line([ "manage.py", "migrate" ])
+    execute_from_command_line(["manage.py", "migrate"])
 
     if REPO_DIR.exists():
-        if os.name == 'nt':
+        if os.name == "nt":
             # The proper API really doesn't like git's file permissions on
             # Windows, so we do this
             os.system(f"rmdir /S /Q {REPO_DIR}")

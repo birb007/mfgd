@@ -10,7 +10,9 @@ from mfgd_app.models import Repository
 
 class InfoTestCase(TestCase):
     def setUp(self):
-        Repository.objects.create(name="linear", path="tests/repo/linear", isPublic=True)
+        Repository.objects.create(
+            name="linear", path="tests/repo/linear", isPublic=True
+        )
         self.client = Client()
 
     def tearDown(self):
@@ -29,31 +31,31 @@ class InfoTestCase(TestCase):
 
         DIFF_REGEX = (
             r"""<tr>\s*"""
-                r"""<td>M</td>\s*"""
-                r"""<td>\+\+1</td>\s*"""
-                r"""<td>--1</td>\s*"""
-                f"""<td><a href="/linear/view/{commit.oid}/file">file</a></td>"""
+            r"""<td>M</td>\s*"""
+            r"""<td>\+\+1</td>\s*"""
+            r"""<td>--1</td>\s*"""
+            f"""<td><a href="/linear/view/{commit.oid}/file">file</a></td>"""
             r"""\s*</tr>"""
         )
         self.assertTrue(re.search(DIFF_REGEX, content))
 
         COMMITTER_REGEX = (
             r"""<table class="commit_info">"""
-                r"""\s*<tr>"""
-                    r"""\s*<td>From:</td>"""
-                    r"""\s*<td>(?P<commiter_info>.*)</td>"""
-                r"""\s*</tr>"""
-                r"""\s*<tr>"""
-                    r"""\s*<td>Date:</td>"""
-                    r"""\s*<td>"""
-                        r"""\s*<time [\s\S]*>(?P<date>.*)</time>"""
-                    r"""\s*</td>"""
-                r"""\s*</tr>"""
-                r"""\s*<tr>"""
-                    r"""\s*<td class="commit_msg"[\s\S]*>"""
-                        r"""\s*<pre>(?P<msg>.*)</pre>"""
-                    r"""\s*</td>"""
-                r"""\s*</tr>"""
+            r"""\s*<tr>"""
+            r"""\s*<td>From:</td>"""
+            r"""\s*<td>(?P<commiter_info>.*)</td>"""
+            r"""\s*</tr>"""
+            r"""\s*<tr>"""
+            r"""\s*<td>Date:</td>"""
+            r"""\s*<td>"""
+            r"""\s*<time [\s\S]*>(?P<date>.*)</time>"""
+            r"""\s*</td>"""
+            r"""\s*</tr>"""
+            r"""\s*<tr>"""
+            r"""\s*<td class="commit_msg"[\s\S]*>"""
+            r"""\s*<pre>(?P<msg>.*)</pre>"""
+            r"""\s*</td>"""
+            r"""\s*</tr>"""
             r"""\s*</table>"""
         )
 
@@ -67,7 +69,9 @@ class InfoTestCase(TestCase):
         self.assertEqual(commit.committer.name, name)
         self.assertEqual(commit.committer.email, email)
         self.assertEqual(commit.message, msg)
-        fs_timestamp = dt.utcfromtimestamp(commit.committer.timestamp).strftime("%Y-%m-%d %H:%M")
+        fs_timestamp = dt.utcfromtimestamp(commit.committer.timestamp).strftime(
+            "%Y-%m-%d %H:%M"
+        )
         self.assertEqual(fs_timestamp, timestamp)
 
     def test_has_diff(self):
@@ -83,26 +87,26 @@ class InfoTestCase(TestCase):
         # this took far longer than i'm willing to admit
         DIFF_REGEX = (
             r"""<table class="highlighttable">"""
-                r"""\s*<tr>"""
-                    r"""\s*<td class="linenos">"""
-                        r"""[\s\S]*"""
-                    r"""</td>"""
-                    r"""<td class="code">"""
-                        r"""\s*<div class="highlight">"""
-                            r"""\s*<pre>[\s\S]*"""
-                                r"""\s*<span class="gd">\-\-\- a/file</span>"""
-                                r"""\s*<span class="gi">\+\+\+ b/file</span>"""
-                                r"""\s*<span class="gu">@@ -1,4 \+1,4 @@</span>"""
-                                r"""\s*<span class="gd">-#4</span>"""
-                                r"""\s*<span class="gi">\+#5</span>"""
-                                """\n multi"""
-                                """\n line"""
-                                """\n file"""
-                                """\n"""
-                            r"""</pre>"""
-                        r"""\s*</div>"""
-                    r"""\s*</td>"""
-                r"""\s*</tr>"""
+            r"""\s*<tr>"""
+            r"""\s*<td class="linenos">"""
+            r"""[\s\S]*"""
+            r"""</td>"""
+            r"""<td class="code">"""
+            r"""\s*<div class="highlight">"""
+            r"""\s*<pre>[\s\S]*"""
+            r"""\s*<span class="gd">\-\-\- a/file</span>"""
+            r"""\s*<span class="gi">\+\+\+ b/file</span>"""
+            r"""\s*<span class="gu">@@ -1,4 \+1,4 @@</span>"""
+            r"""\s*<span class="gd">-#4</span>"""
+            r"""\s*<span class="gi">\+#5</span>"""
+            """\n multi"""
+            """\n line"""
+            """\n file"""
+            """\n"""
+            r"""</pre>"""
+            r"""\s*</div>"""
+            r"""\s*</td>"""
+            r"""\s*</tr>"""
             r"""\s*</table>"""
         )
         self.assertTrue(re.search(DIFF_REGEX, content))
@@ -119,8 +123,8 @@ class InfoTestCase(TestCase):
 
         ANCHOR_REGEX = (
             r"""<a class="button commit_inspect" [\s\S]*"""
-                f"""href="/linear/view/{commit.oid}/">"""
-                r"""Inspect Tree"""
+            f"""href="/linear/view/{commit.oid}/">"""
+            r"""Inspect Tree"""
             r"""\s*</a>"""
         )
         self.assertTrue(re.search(ANCHOR_REGEX, content))

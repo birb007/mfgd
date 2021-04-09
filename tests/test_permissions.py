@@ -20,7 +20,9 @@ class PermissionTestCase(TestCase):
         regular = User.objects.create(username="regular", password=passwd)
 
         # create repository object
-        linear = Repository.objects.create(name="linear", path="tests/repo/linear", isPublic=False)
+        linear = Repository.objects.create(
+            name="linear", path="tests/repo/linear", isPublic=False
+        )
 
         # create profiles
         UserProfile.objects.create(user=admin, isAdmin=True)
@@ -46,53 +48,71 @@ class PermissionTestCase(TestCase):
         ENDPOINT = "/linear/manage/"
 
         users = [
-            ("admin", 200), ("manager", 200),
-            ("viewer", 404), ("regular", 404),
+            ("admin", 200),
+            ("manager", 200),
+            ("viewer", 404),
+            ("regular", 404),
         ]
 
         for username, status in users:
             self.client.login(username=username, password="")
             response = self.client.get(ENDPOINT, follow=True)
-            self.assertEqual(response.status_code, status,
-                f"user \"{username}\" had unexpected management access")
+            self.assertEqual(
+                response.status_code,
+                status,
+                f'user "{username}" had unexpected management access',
+            )
 
         self.client.logout()
         response = self.client.get(ENDPOINT, follow=True)
-        self.assertEqual(response.status_code, 404,
-                f"user \"{username}\" had unexpected management access")
+        self.assertEqual(
+            response.status_code,
+            404,
+            f'user "{username}" had unexpected management access',
+        )
 
     def test_permitted_users_can_view_repo(self):
         ENDPOINT = "/linear/view/"
 
         users = [
-            ("admin", 200), ("manager", 200),
-            ("viewer", 200), ("regular", 404),
+            ("admin", 200),
+            ("manager", 200),
+            ("viewer", 200),
+            ("regular", 404),
         ]
 
         for username, status in users:
             self.client.login(username=username, password="")
             response = self.client.get(ENDPOINT, follow=True)
-            self.assertEqual(response.status_code, status,
-                f"user \"{username}\" had unexpected viewing access")
+            self.assertEqual(
+                response.status_code,
+                status,
+                f'user "{username}" had unexpected viewing access',
+            )
 
         self.client.logout()
         response = self.client.get(ENDPOINT, follow=True)
-        self.assertEqual(response.status_code, 404,
-                "anonymous user had unexpected viewing access")
+        self.assertEqual(
+            response.status_code, 404, "anonymous user had unexpected viewing access"
+        )
 
     def test_dashboard_indexes_visible_repo(self):
         ENDPOINT = "/"
         REPO_LINK = r"""<a href="/linear/view/\w*">linear</a>"""
 
         users = [
-            ("admin", True), ("manager", True),
-            ("viewer", True), ("regular", False),
+            ("admin", True),
+            ("manager", True),
+            ("viewer", True),
+            ("regular", False),
         ]
 
         for username, present in users:
             self.client.login(username=username, password="")
             response = self.client.get(ENDPOINT)
-            self.assertEqual(bool(re.search(REPO_LINK, response.content.decode())), present)
+            self.assertEqual(
+                bool(re.search(REPO_LINK, response.content.decode())), present
+            )
 
         self.client.logout()
         response = self.client.get(ENDPOINT)
@@ -104,9 +124,15 @@ class PermissionTestCase(TestCase):
         self.client.login(username="manager", password="")
         admin = UserProfile.objects.get(user__username="admin")
 
-        payload = {"action": "update_perm", "id": f"{admin.id}", "visible": True, "manage": False}
-        response = self.client.post(ENDPOINT, json.dumps(payload),
-                content_type="application/json")
+        payload = {
+            "action": "update_perm",
+            "id": f"{admin.id}",
+            "visible": True,
+            "manage": False,
+        }
+        response = self.client.post(
+            ENDPOINT, json.dumps(payload), content_type="application/json"
+        )
 
         self.assertEqual(response.status_code, 400)
 
@@ -116,9 +142,15 @@ class PermissionTestCase(TestCase):
         self.client.login(username="manager", password="")
         manager = UserProfile.objects.get(user__username="manager")
 
-        payload = {"action": "update_perm", "id": f"{manager.id}", "visible": True, "manage": False}
-        response = self.client.post(ENDPOINT, json.dumps(payload),
-                content_type="application/json")
+        payload = {
+            "action": "update_perm",
+            "id": f"{manager.id}",
+            "visible": True,
+            "manage": False,
+        }
+        response = self.client.post(
+            ENDPOINT, json.dumps(payload), content_type="application/json"
+        )
 
         self.assertEqual(response.status_code, 400)
 
@@ -128,17 +160,25 @@ class PermissionTestCase(TestCase):
         self.client.login(username="manager", password="")
         regular = UserProfile.objects.get(user__username="regular")
 
-        payload = {"action": "update_perm", "id": f"{regular.id}", "visible": True, "manage": False}
-        response = self.client.post(ENDPOINT, json.dumps(payload),
-                content_type="application/json")
+        payload = {
+            "action": "update_perm",
+            "id": f"{regular.id}",
+            "visible": True,
+            "manage": False,
+        }
+        response = self.client.post(
+            ENDPOINT, json.dumps(payload), content_type="application/json"
+        )
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(CanAccess.objects.filter(user=regular).exists())
 
     def test_can_inspect(self):
         users = [
-            ("admin", 200), ("manager", 200),
-            ("viewer", 200), ("regular", 404),
+            ("admin", 200),
+            ("manager", 200),
+            ("viewer", 200),
+            ("regular", 404),
         ]
 
         linear = mpygit.Repository(Repository.objects.get(name="linear").path)
@@ -147,8 +187,11 @@ class PermissionTestCase(TestCase):
         for username, status in users:
             self.client.login(username=username, password="")
             response = self.client.get(ENDPOINT)
-            self.assertEqual(response.status_code, status,
-                f"user \"{username}\" has unexpected commit visibility")
+            self.assertEqual(
+                response.status_code,
+                status,
+                f'user "{username}" has unexpected commit visibility',
+            )
 
         self.client.logout()
         response = self.client.get(ENDPOINT)
@@ -156,8 +199,10 @@ class PermissionTestCase(TestCase):
 
     def test_can_view_commits(self):
         users = [
-            ("admin", 200), ("manager", 200),
-            ("viewer", 200), ("regular", 404),
+            ("admin", 200),
+            ("manager", 200),
+            ("viewer", 200),
+            ("regular", 404),
         ]
 
         ENDPOINT = f"/linear/chain/"
@@ -165,8 +210,11 @@ class PermissionTestCase(TestCase):
         for username, status in users:
             self.client.login(username=username, password="")
             response = self.client.get(ENDPOINT, follow=True)
-            self.assertEqual(response.status_code, status,
-                f"user \"{username}\" has unexpected chain visibility")
+            self.assertEqual(
+                response.status_code,
+                status,
+                f'user "{username}" has unexpected chain visibility',
+            )
 
         self.client.logout()
         response = self.client.get(ENDPOINT, follow=True)
@@ -183,4 +231,3 @@ class PermissionTestCase(TestCase):
         self.client.logout()
         response = self.client.get(ENDPOINT, follow=True)
         self.assertEqual(response.request["PATH_INFO"], "/")
-

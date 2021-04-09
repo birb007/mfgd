@@ -5,11 +5,13 @@ from mfgd_app.models import Repository
 # \s*<a href="([\s\S]+?)">[\s\S]+?</a>\s*
 
 REGEX_DIR_ENTS = re.compile(
-r"""\s*<td class="">\s*<a href="([\s\S]+?)">[\s\S]+?</a>\s*</td>
+    r"""\s*<td class="">\s*<a href="([\s\S]+?)">[\s\S]+?</a>\s*</td>
 \s*<td class="commit-msg">([\s\S]+?)</td>
 \s*<td class="commit-id">\s*<a class="commit" href="\S*">\S*</a>
 \s*</td>\s*<td class="commit-date">[\s\S]+?</td>""",
-re.MULTILINE)
+    re.MULTILINE,
+)
+
 
 class TreeTestCase(TestCase):
     def setUp(self):
@@ -27,7 +29,7 @@ class TreeTestCase(TestCase):
         content = self._get_tree("dirs")
 
         # Entries must appear in this order
-        ENTS = ( "dir1", "dir2", "file1", "file2")
+        ENTS = ("dir1", "dir2", "file1", "file2")
 
         for i, match in enumerate(REGEX_DIR_ENTS.finditer(content)):
             name, last_change = match.groups()

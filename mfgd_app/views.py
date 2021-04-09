@@ -21,10 +21,8 @@ from mfgd_app.models import Repository, CanAccess, UserProfile
 from mfgd_app.forms import RegisterForm, RepoForm, UserUpdateForm, ProfileUpdateForm
 
 
-
 def default_branch(db_repo_obj):
-    """Get default branch for a Repository database object.
-    """
+    """Get default branch for a Repository database object."""
     # NOTE: someone please fix this if you can, but the pygit2 API does not
     # provide access to the global HEAD as it"s not a proper ref
     with open(db_repo_obj.path + "/.git/HEAD") as f:
@@ -32,14 +30,13 @@ def default_branch(db_repo_obj):
 
 
 def index(request):
-    """Display MFGD index page of visible repositories.
-    """
+    """Display MFGD index page of visible repositories."""
     context_dict = {}
 
     accessible_repos = Repository.objects.filter(isPublic=True)
     if not request.user.is_anonymous:
 
-        if hasattr(request.user, 'userprofile') and request.user.userprofile.isAdmin:
+        if hasattr(request.user, "userprofile") and request.user.userprofile.isAdmin:
             accessible_repos = Repository.objects.all()
         else:
             try:
@@ -56,6 +53,7 @@ def index(request):
 
     context_dict["repositories"] = accessible_repos
     return render(request, "index.html", context_dict)
+
 
 def read_blob(blob):
     """Read then blob data and specialised template.
@@ -95,6 +93,7 @@ def gen_crumbs(repo_name, oid, path):
     Returns:
         List of Crumb objects used to reference backward positions in subtrees.
     """
+
     class Crumb:
         def __init__(self, name, url):
             self.name = name
@@ -114,6 +113,7 @@ def gen_crumbs(repo_name, oid, path):
         crumbs.append(Crumb(parts[off], url))
     return crumbs
 
+
 def gen_branches(repo_name, repo, oid):
     """Return all branches in Git repository on disk.
 
@@ -125,6 +125,7 @@ def gen_branches(repo_name, repo, oid):
     Returns:
         List of Branch objects for each head in Git repository.
     """
+
     class Branch:
         def __init__(self, name, url):
             self.name = name
@@ -138,8 +139,7 @@ def gen_branches(repo_name, repo, oid):
 
 
 def view_default(request, repo_name):
-    """Shortcut method to view repository default branch without specification.
-    """
+    """Shortcut method to view repository default branch without specification."""
     db_repo = get_object_or_404(Repository, name=repo_name)
     branch = default_branch(db_repo)
     url = urls.reverse(
@@ -215,8 +215,7 @@ def view(request, permission, repo_name, oid, path):
 
 
 def user_login(request):
-    """Create new user session.
-    """
+    """Create new user session."""
     context = {}
     if request.method == "POST":
         username = request.POST.get("username")
@@ -234,8 +233,7 @@ def user_login(request):
 
 
 def user_register(request):
-    """Register new User and UserProfile.
-    """
+    """Register new User and UserProfile."""
     context = {}
 
     if request.method == "POST":
@@ -266,18 +264,19 @@ def user_register(request):
 
 @login_required
 def user_logout(request):
-    """Logout user session.
-    """
+    """Logout user session."""
     logout(request)
     return redirect(reverse("index"))
 
+
 @login_required
 def user_profile(request):
-    """Display or update user profile information.
-    """
+    """Display or update user profile information."""
     if request.method == "POST" and "profile_change" in request.POST:
         u_form = UserUpdateForm(request.POST, instance=request.user)
-        p_form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user.userprofile)
+        p_form = ProfileUpdateForm(
+            request.POST, request.FILES, instance=request.user.userprofile
+        )
 
         if u_form.is_valid():
             u_form.save()
@@ -288,8 +287,8 @@ def user_profile(request):
         p_form = ProfileUpdateForm(instance=request.user.userprofile)
 
     if request.method == "POST" and "password_change" in request.POST:
-         pw_form = PasswordChangeForm(request.user, request.POST)
-         if pw_form.is_valid():
+        pw_form = PasswordChangeForm(request.user, request.POST)
+        if pw_form.is_valid():
             user = pw_form.save()
             # update user session to reflect credential changes this way the
             # user does not have to login after they change their credentials
@@ -298,9 +297,9 @@ def user_profile(request):
         pw_form = PasswordChangeForm(request.user)
 
     context = {
-        "u_form":u_form,
-        "p_form":p_form,
-        "pw_form":pw_form,
+        "u_form": u_form,
+        "p_form": p_form,
+        "pw_form": pw_form,
     }
 
     return render(request, "profile.html", context)
@@ -321,6 +320,7 @@ def info(request, permission, repo_name, oid):
         repo_name: name of managed repository.
         oid: commit object ID to inspect.
     """
+
     class FileChange:
         def __init__(self, path, patch, status):
             self.path = path
@@ -363,8 +363,7 @@ def info(request, permission, repo_name, oid):
 
 
 def chain_default(request, repo_name):
-    """Shortcut method to chain endpoint providing default branch as oid.
-    """
+    """Shortcut method to chain endpoint providing default branch as oid."""
     db_repo = get_object_or_404(Repository, name=repo_name)
     branch = default_branch(db_repo)
     url = urls.reverse("chain", kwargs={"repo_name": repo_name, "oid": branch})
@@ -429,6 +428,7 @@ def manage_repo(request, permission, repo_name):
     Returns:
         Rendered template if user browsers page or API response.
     """
+
     class ProfilePerm:
         def __init__(self, profile, permission):
             self.id = profile.id
@@ -478,14 +478,12 @@ def manage_repo(request, permission, repo_name):
         except CanAccess.DoesNotExist:
             pass
 
-        users.append(
-            ProfilePerm(profile, permission)
-        )
+        users.append(ProfilePerm(profile, permission))
 
     context = {
         "repo_name": repo_name,
         "desc": db_repo.description,
-        "url" : db_repo.path,
+        "url": db_repo.path,
         "users": users,
         "is_public": db_repo.isPublic,
         "oid": default_branch(db_repo),
@@ -515,7 +513,7 @@ def update_profile_permissions(repo, manager, payload):
         # let KeyError bubble up to callsite
         val = payload[name]
         if not isinstance(val, type):
-            raise TypeError(f"invalid parameter \"{name}\" (expected \"{type}\")")
+            raise TypeError(f'invalid parameter "{name}" (expected "{type}")')
         return val
 
     user_id = get_entry("id", str)
@@ -556,11 +554,12 @@ def update_repo_visibility(repo, payload):
         repo: Repository database object.
         payload: JSON payload with format specified above.
     """
+
     def get_entry(name, type):
         # let KeyError bubble up to callsite
         val = payload[name]
         if not isinstance(val, type):
-            raise TypeError(f"invalid parameter \"{name}\" (expected \"{type}\")")
+            raise TypeError(f'invalid parameter "{name}" (expected "{type}")')
         return val
 
     public = get_entry("public", bool)
@@ -582,6 +581,7 @@ def update_description(repo, payload):
     repo.description = payload["description"]
     repo.save()
 
+
 @verify_user_permissions
 def delete_repo(request, permisson, repo_name):
     """[AJAX] Delete repository from database **not** the filesystem.
@@ -597,9 +597,9 @@ def delete_repo(request, permisson, repo_name):
         get_object_or_404(Repository, name=repo_name).delete()
     return redirect("index")
 
+
 def add_repo(request):
-    """Create new repository through HTTP form.
-    """
+    """Create new repository through HTTP form."""
     if request.user.is_anonymous or not request.user.userprofile.isAdmin:
         return redirect("index")
 
@@ -620,8 +620,10 @@ def add_repo(request):
             context["form"] = repo_form
     return render(request, "add_repo.html", context=context)
 
+
 def error_404(request, exception):
     return render(request, "404.html", {})
+
 
 def error_500(request):
     return render(request, "500.html", {})

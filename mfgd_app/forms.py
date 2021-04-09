@@ -8,8 +8,11 @@ User._meta.get_field("email")._unique = True
 User._meta.get_field("email").blank = False
 User._meta.get_field("email").null = False
 
+
 class RegisterForm(forms.ModelForm):
-    password = forms.CharField(widget=forms.PasswordInput(),validators=[validate_password])
+    password = forms.CharField(
+        widget=forms.PasswordInput(), validators=[validate_password]
+    )
 
     class Meta:
         model = User
@@ -18,6 +21,7 @@ class RegisterForm(forms.ModelForm):
             "email",
             "password",
         )
+
 
 class RepoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -33,10 +37,15 @@ class RepoForm(forms.ModelForm):
             "isPublic",
         )
 
+
 class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
-        fields = ("username", "email",)
+        fields = (
+            "username",
+            "email",
+        )
+
 
 class ProfileUpdateForm(forms.ModelForm):
     class Meta:
